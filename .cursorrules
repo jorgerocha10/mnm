@@ -1,0 +1,370 @@
+# Cursor Rules
+
+## Instructions
+
+Maps & Memories will operate as a simple e-commerce platform without user logins. Customers can browse and purchase products seamlessly, while an admin panel will be available for managing products and orders visible only with a login and password for admin, not users.
+
+- Record fixes for mistakes or corrections to avoid repetition in the `Lessons` section.
+- Organize thoughts and plan steps before starting a task in the `Scratchpad` section.
+- Clear old tasks if necessary.
+- Use todo markers for progress tracking:
+  - `[x] ` Completed tasks
+  - `[ ]` Pending tasks
+- Update Scratchpad after completing subtasks.
+- Reflect and plan after milestones for better task management.
+- Always refer to Scratchpad before planning the next step.
+
+##
+
+Brand Styling Guide
+The e-commerce platform should strictly follow the Maps & Memories brand identity as per the brand guide.
+Typography
+Web fonts: Use a clean, modern sans-serif font for web content (e.g., Lato, Montserrat)
+Color Palette
+• White (#F7F5F6) - Background elements
+• Dark Blue (#253946) - Main text and headings
+• Soft Blue (#95A7B5) - Accents
+• Beige (#D2BDA2) - Secondary background
+• Warm Brown (#A76825) - Call-to-action buttons
+UI Elements
+• Minimalist and elegant design
+• Subtle borders and spacing to maintain a clean look
+• Icons should match the outlined, modern style used in branding
+Imagery
+• Use high-resolution images with soft shadows
+• Consistent lighting for product shots
+• Backgrounds should be neutral or lightly textured
+Buttons & Links
+• Call-to-action buttons (e.g., "Buy Now") should use Warm Brown (#A76825)
+• Secondary buttons (e.g., "Learn More") can use Soft Blue (#95A7B5)
+• Hover effects should be subtle (light color changes or soft shadows)
+
+## Lessons
+
+1. Use `npx shadcn@latest add [component]` instead of `npx shadcn-ui@latest add [component]` when installing Shadcn UI components.
+2. In Next.js 14+, page props params must be typed as a Promise. Example:
+   ```typescript
+   type tParams = Promise<{ id: string }>;
+   interface PageProps {
+     params: tParams;
+   }
+   ```
+   Then await the params in the component:
+   ```typescript
+   export default async function Page(props: PageProps) {
+     const { id } = await props.params;
+   }
+   ```
+3. Use `const session = await auth()` instead of `const session = await getServerSession(authOptions)` for Next.js authentication. The new `auth()` function is the recommended way to get the session in Next.js Auth v5.
+4. When importing `useRouter` from 'next/navigation', the component must be marked as a client component using the `'use client'` directive at the top of the file, as this hook only works on the client side.
+5. Install Shadcn UI components individually using separate commands (`npx shadcn@latest add [component]`) rather than installing multiple components at once to avoid PowerShell console errors and ensure each component is installed correctly with the proper dependencies.
+
+## Scratchpad
+
+### 1. Project Setup and Configuration [ ]
+
+- [x] Initialize Next.js 15 project with TypeScript
+  - [x] Create project with `npx create-next-app@latest maps-and-memories --typescript`
+  - [x] Configure Next.js app router structure
+  - [x] Set up environment variables (.env.local)
+- [x] Set up project structure and folders
+  - [ ] Create components directory structure (ui, layout, shared)
+  - [ ] Set up app directory with route groups ((home), (admin))
+  - [ ] Create lib folder for utilities and hooks
+- [x] Configure ESLint and Prettier
+  - [ ] Add custom ESLint rules
+  - [ ] Set up Prettier configuration
+  - [ ] Add pre-commit hooks with Husky
+- [ ] Install and configure dependencies:
+  - [x] Set up Shadcn UI
+    - [x] Initialize with `npx shadcn@latest init`
+    - [x] Install core components:
+      - [x] Button
+      - [x] Card
+      - [x] Input
+      - [x] Form
+      - [x] Checkbox
+      - [x] Select
+      - [x] Sonner (toast)
+      - [x] Dialog
+      - [x] Dropdown-menu
+      - [x] Table
+      - [x] Tabs
+      - [x] Avatar
+      - [x] Separator
+      - [x] Skeleton
+      - [x] Popover
+      - [x] Sheet
+    - [ ] Configure theme with Maps & Memories brand colors
+  - [x] Install Lucide icons for UI elements
+  - [x] Configure Zod schemas for form validation
+  - [x] Set up Zustand store for:
+    - [ ] Cart state management
+    - [ ] UI state (filters, modals)
+    - [ ] User preferences
+  - [x] Configure Resend for email templates and sending
+    - [ ] Create email templates
+    - [ ] Configure sending service
+  - [x] Set up Uploadthing for product image uploads
+    - [ ] Configure API routes
+    - [ ] Create upload components
+  - [x] Configure Prisma ORM and connect to database
+    - [x] Initialize with PostgreSQL
+    - [ ] Set up models
+    - [ ] Create migration scripts
+  - [x] Set up PostgreSQL database connection
+    - [ ] Set up local/cloud database
+    - [ ] Configure connection string in .env
+  - [x] Configure NextAuth.js beta for admin authentication
+    - [ ] Set up auth routes
+    - [ ] Configure providers
+    - [ ] Create protected routes
+  - [x] Integrate Stripe for payment processing
+    - [ ] Set up webhook endpoints
+    - [ ] Configure checkout session
+
+### 2. Database and Authentication [ ]
+
+- [ ] Set up PostgreSQL database
+  - [ ] Create database instance (local/cloud)
+  - [ ] Configure connection string in .env
+  - [ ] Set up migrations workflow
+- [ ] Configure Prisma schema:
+  - [ ] Admin model
+    - [ ] Fields: id, name, email, password (hashed), role, createdAt, updatedAt
+  - [ ] Product model
+    - [ ] Base fields: id, name, slug, description, price, images, stock, createdAt, updatedAt
+    - [ ] Frame options: frameSizes (enum: 8x8, 10x10), frameTypes (enum: pine, dark)
+    - [ ] Category relationship
+    - [ ] Reviews relationship
+  - [ ] Order model
+    - [ ] Base fields: id, customerEmail, customerName, status, total, createdAt, updatedAt
+    - [ ] Address information: shippingAddress, city, country, postalCode
+    - [ ] Map information: latitude, longitude, address
+    - [ ] Product options: frameSize, frameType, engravingText
+    - [ ] Payment information: paymentIntentId, paymentStatus
+  - [ ] Category model
+    - [ ] Fields: id, name, slug, image, products
+  - [ ] Review model
+    - [ ] Fields: id, rating, comment, customerName, productId, createdAt
+  - [ ] Cart model
+    - [ ] Fields: id, cartItems, cartId (cookie), createdAt, updatedAt
+  - [ ] Create database seeding script for initial data
+- [ ] Implement NextAuth.js authentication:
+  - [ ] Configure auth.ts with Credentials provider
+  - [ ] Set up password hashing and validation
+  - [ ] Create JWT strategy with proper expiration
+  - [ ] Implement protected API routes for admin functions
+  - [ ] Create middleware for admin route protection
+  - [ ] Set up login and logout functionality
+
+### 3. Core Features - Customer Side [ ]
+
+- [ ] Home Layout:
+  - [ ] Create `(home)` folder in `app` directory
+  - [ ] Design responsive header with:
+    - [ ] Logo (logo.png)
+    - [ ] Navigation menu
+    - [ ] Cart icon with item count
+    - [ ] Mobile menu for smaller screens
+  - [ ] Create footer with:
+    - [ ] Company information
+    - [ ] Navigation links
+    - [ ] Social media icons
+    - [ ] Newsletter signup
+  - [ ] Implement responsive container layout
+- [ ] Homepage:
+  - [ ] Build hero section with:
+    - [ ] Heading: "Turn Your Special Places into Lasting Memories"
+    - [ ] CTA button to shop
+    - [ ] Featured image (placeholder)
+  - [ ] Create featured products section:
+    - [ ] Product cards with images
+    - [ ] Quick view functionality
+    - [ ] Add to cart button
+  - [ ] Design "How It Works" section:
+    - [ ] Step-by-step process explanation
+    - [ ] Illustrative images
+    - [ ] Secondary CTA
+- [ ] Products Catalog:
+  - [ ] Build products page (`/products`):
+    - [ ] Implement filter sidebar with:
+      - [ ] Category filters
+      - [ ] Price range
+      - [ ] Frame type filters
+      - [ ] Frame size filters
+    - [ ] Create product grid with:
+      - [ ] Pagination controls
+      - [ ] Sort options
+      - [ ] Product cards
+    - [ ] Add search functionality:
+      - [ ] Search input with debounce
+      - [ ] Search results display
+      - [ ] No results handling
+  - [ ] Implement mobile-responsive filtering
+- [ ] Product pages:
+  - [ ] Create dynamic product route (`/products/[slug]`)
+  - [ ] Design product detail page:
+    - [ ] Image gallery with thumbnails and zoom
+    - [ ] Product information section
+    - [ ] Price and availability display
+  - [ ] Build product options form:
+    - [ ] Frame size selector (8x8 or 10x10)
+    - [ ] Location input with toggle:
+      - [ ] Address input with autocomplete
+      - [ ] Coordinates input (latitude/longitude)
+    - [ ] Frame type selector (pine wood or dark wood)
+    - [ ] Engraving text input with character limit
+  - [ ] Add related products section
+  - [ ] Implement reviews and ratings section
+- [ ] Shopping cart:
+  - [ ] Create cart page (`/cart`):
+    - [ ] Cart item listing
+    - [ ] Quantity adjustment controls
+    - [ ] Remove item functionality
+    - [ ] Price subtotals
+  - [ ] Implement cart sidebar/drawer:
+    - [ ] Toggle from header cart icon
+    - [ ] Mini cart preview
+    - [ ] Checkout button
+  - [ ] Set up cart state persistence:
+    - [ ] Local storage fallback
+    - [ ] Server-side cart storage
+- [ ] Checkout process:
+  - [ ] Design multi-step checkout:
+    - [ ] Shipping information form
+    - [ ] Review cart contents
+    - [ ] Payment method selection
+  - [ ] Implement Stripe payment integration:
+    - [ ] Create Stripe Elements form
+    - [ ] Handle payment intents
+    - [ ] Process payment submission
+  - [ ] Build order confirmation:
+    - [ ] Success page with order details
+    - [ ] Email confirmation trigger
+    - [ ] "Continue shopping" option
+
+### 4. Admin Dashboard [ ]
+
+- [ ] Admin authentication and authorization
+  - [ ] Create sign-in page (`/admin/signin`)
+  - [ ] Implement session management
+  - [ ] Set up role-based access control
+- [ ] Dashboard overview:
+  - [ ] Layout and Structure:
+    - [ ] Create admin dashboard layout with sidebar navigation
+    - [ ] Build responsive dashboard grid system
+    - [ ] Implement breadcrumb navigation
+    - [ ] Add loading states and error boundaries
+  - [ ] Key Metrics Cards:
+    - [ ] Total revenue widget with chart
+    - [ ] Orders count with trend indicator
+    - [ ] Customer count summary
+    - [ ] Average order value calculation
+  - [ ] Recent Orders Table:
+    - [ ] Implement data table with server-side pagination
+    - [ ] Add columns: Order ID, Customer, Total, Status, Date
+    - [ ] Include sorting and filtering
+    - [ ] Add quick action buttons
+- [ ] Product management:
+  - [ ] Create products listing page (`/admin/products`):
+    - [ ] Searchable and filterable table
+    - [ ] Bulk selection actions
+    - [ ] Status toggles
+  - [ ] Build product form (`/admin/products/new`, `/admin/products/[id]/edit`):
+    - [ ] General information fields
+    - [ ] Pricing and inventory
+    - [ ] Frame options configuration
+    - [ ] SEO metadata
+  - [ ] Implement image management:
+    - [ ] Multi-image upload with Uploadthing
+    - [ ] Image reordering
+    - [ ] Image cropping and optimization
+- [ ] Order management:
+  - [ ] Create orders listing page (`/admin/orders`):
+    - [ ] Filterable by date, status, customer
+    - [ ] Quick status update actions
+    - [ ] Export functionality
+  - [ ] Build order detail view (`/admin/orders/[id]`):
+    - [ ] Customer information
+    - [ ] Order items with options
+    - [ ] Status update workflow
+    - [ ] Payment details
+    - [ ] Shipping information
+
+### 5. Advanced Features [ ]
+
+- [ ] Real-time notifications
+  - [ ] Set up WebSocket connection for admin
+  - [ ] Implement notification component
+  - [ ] Add sound alerts for new orders
+- [ ] Email system (Resend):
+  - [ ] Design email templates:
+    - [ ] Order confirmation
+    - [ ] Shipping updates
+    - [ ] Admin password reset
+  - [ ] Configure email sending triggers
+  - [ ] Add email preview in admin
+- [ ] Search optimization
+  - [ ] Implement efficient product search
+  - [ ] Add search suggestions
+  - [ ] Build search results page
+- [ ] Performance optimization:
+  - [ ] Set up Next.js Image component optimization
+  - [ ] Implement caching strategies for API routes
+  - [ ] Add loading skeletons for UI elements
+  - [ ] Optimize database queries
+  - [ ] Set up CDN for static assets
+- [ ] Analytics and reporting
+  - [ ] Implement basic analytics dashboard
+  - [ ] Create sales report generation
+  - [ ] Add product performance metrics
+  - [ ] Set up export functionality for reports
+
+### 6. Testing and Deployment [ ]
+
+- [ ] Unit testing
+  - [ ] Set up Jest configuration
+  - [ ] Write component tests
+  - [ ] Create API route tests
+  - [ ] Test utility functions
+- [ ] Integration testing
+  - [ ] Test checkout flow
+  - [ ] Verify admin workflows
+  - [ ] Validate form submissions
+- [ ] E2E testing
+  - [ ] Configure Playwright
+  - [ ] Create customer journey tests
+  - [ ] Test admin dashboard operations
+- [ ] Security audit
+  - [ ] Review authentication implementation
+  - [ ] Check API endpoints for vulnerabilities
+  - [ ] Validate input sanitization
+  - [ ] Test file upload security
+- [ ] Production deployment:
+  - [ ] Set up Vercel project
+  - [ ] Configure environment variables
+  - [ ] Set up database connection
+  - [ ] Configure Stripe webhook endpoints
+  - [ ] Set up monitoring and error tracking
+  - [ ] Create database backup strategy
+
+### 7. Documentation [ ]
+
+- [ ] API documentation
+  - [ ] Document all API endpoints
+  - [ ] Create request/response examples
+  - [ ] Add authentication details
+- [ ] User guide
+  - [ ] Write customer website guide
+  - [ ] Create product ordering instructions
+  - [ ] Document checkout process
+- [ ] Admin documentation
+  - [ ] Create admin dashboard guide
+  - [ ] Document order management process
+  - [ ] Add product creation tutorial
+- [ ] Deployment guide
+  - [ ] Document environment setup
+  - [ ] Create database migration guide
+  - [ ] Add troubleshooting section
+  - [ ] Include performance optimization tips
