@@ -58,6 +58,8 @@ Buttons & Links
 3. Use `const session = await auth()` instead of `const session = await getServerSession(authOptions)` for Next.js authentication. The new `auth()` function is the recommended way to get the session in Next.js Auth v5.
 4. When importing `useRouter` from 'next/navigation', the component must be marked as a client component using the `'use client'` directive at the top of the file, as this hook only works on the client side.
 5. Install Shadcn UI components individually using separate commands (`npx shadcn@latest add [component]`) rather than installing multiple components at once to avoid PowerShell console errors and ensure each component is installed correctly with the proper dependencies.
+6. Use `bcryptjs` instead of `bcrypt` for password hashing in Next.js projects, as it's more compatible with various environments and doesn't require native bindings.
+7. Use CommonJS syntax (`require()`) instead of ES modules (`import`) in Prisma seed files when using ts-node to avoid "Cannot use import statement outside a module" errors.
 
 ## Scratchpad
 
@@ -110,11 +112,11 @@ Buttons & Links
     - [ ] Create upload components
   - [x] Configure Prisma ORM and connect to database
     - [x] Initialize with PostgreSQL
-    - [ ] Set up models
-    - [ ] Create migration scripts
+    - [x] Set up models
+    - [x] Create migration scripts
   - [x] Set up PostgreSQL database connection
-    - [ ] Set up local/cloud database
-    - [ ] Configure connection string in .env
+    - [x] Set up local/cloud database
+    - [x] Configure connection string in .env
   - [x] Configure NextAuth.js beta for admin authentication
     - [ ] Set up auth routes
     - [ ] Configure providers
@@ -125,31 +127,31 @@ Buttons & Links
 
 ### 2. Database and Authentication [ ]
 
-- [ ] Set up PostgreSQL database
-  - [ ] Create database instance (local/cloud)
-  - [ ] Configure connection string in .env
-  - [ ] Set up migrations workflow
-- [ ] Configure Prisma schema:
-  - [ ] Admin model
-    - [ ] Fields: id, name, email, password (hashed), role, createdAt, updatedAt
-  - [ ] Product model
-    - [ ] Base fields: id, name, slug, description, price, images, stock, createdAt, updatedAt
-    - [ ] Frame options: frameSizes (enum: 8x8, 10x10), frameTypes (enum: pine, dark)
-    - [ ] Category relationship
-    - [ ] Reviews relationship
-  - [ ] Order model
-    - [ ] Base fields: id, customerEmail, customerName, status, total, createdAt, updatedAt
-    - [ ] Address information: shippingAddress, city, country, postalCode
-    - [ ] Map information: latitude, longitude, address
-    - [ ] Product options: frameSize, frameType, engravingText
-    - [ ] Payment information: paymentIntentId, paymentStatus
-  - [ ] Category model
-    - [ ] Fields: id, name, slug, image, products
-  - [ ] Review model
-    - [ ] Fields: id, rating, comment, customerName, productId, createdAt
-  - [ ] Cart model
-    - [ ] Fields: id, cartItems, cartId (cookie), createdAt, updatedAt
-  - [ ] Create database seeding script for initial data
+- [x] Set up PostgreSQL database
+  - [x] Create database instance (local/cloud)
+  - [x] Configure connection string in .env
+  - [x] Set up migrations workflow
+- [x] Configure Prisma schema:
+  - [x] Admin model
+    - [x] Fields: id, name, email, password (hashed), role, createdAt, updatedAt
+  - [x] Product model
+    - [x] Base fields: id, name, slug, description, price, images, stock, createdAt, updatedAt
+    - [x] Frame options: frameSizes (enum: 8x8, 10x10), frameTypes (enum: pine, dark)
+    - [x] Category relationship
+    - [x] Reviews relationship
+  - [x] Order model
+    - [x] Base fields: id, customerEmail, customerName, status, total, createdAt, updatedAt
+    - [x] Address information: shippingAddress, city, country, postalCode
+    - [x] Map information: latitude, longitude, address
+    - [x] Product options: frameSize, frameType, engravingText
+    - [x] Payment information: paymentIntentId, paymentStatus
+  - [x] Category model
+    - [x] Fields: id, name, slug, image, products
+  - [x] Review model
+    - [x] Fields: id, rating, comment, customerName, productId, createdAt
+  - [x] Cart model
+    - [x] Fields: id, cartItems, cartId (cookie), createdAt, updatedAt
+  - [x] Create database seeding script for initial data
 - [ ] Implement NextAuth.js authentication:
   - [ ] Configure auth.ts with Credentials provider
   - [ ] Set up password hashing and validation

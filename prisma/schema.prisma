@@ -12,3 +12,165 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// Admin model for authentication
+model Admin {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String   // Hashed password
+  role      Role     @default(ADMIN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  SUPERADMIN
+}
+
+// Product model
+model Product {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String    @db.Text
+  price       Decimal   @db.Decimal(10, 2)
+  images      String[]  // Array of image URLs
+  stock       Int       @default(0)
+  frameTypes  FrameType @default(PINE)
+  frameSizes  FrameSize @default(SMALL)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relationships
+  category   Category? @relation(fields: [categoryId], references: [id])
+  categoryId String?
+  reviews    Review[]
+  orderItems OrderItem[]
+}
+
+enum FrameType {
+  PINE
+  DARK
+}
+
+enum FrameSize {
+  SMALL  // 8x8
+  LARGE  // 10x10
+}
+
+// Order model
+model Order {
+  id            String      @id @default(cuid())
+  customerEmail String
+  customerName  String
+  status        OrderStatus @default(PENDING)
+  total         Decimal     @db.Decimal(10, 2)
+  
+  // Address information
+  shippingAddress String
+  city            String
+  country         String
+  postalCode      String
+  
+  // Map information
+  latitude        Float?
+  longitude       Float?
+  mapAddress      String?
+  
+  // Payment information
+  paymentIntentId String?
+  paymentStatus   PaymentStatus @default(PENDING)
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  // Relationships
+  orderItems      OrderItem[]
+}
+
+model OrderItem {
+  id         String   @id @default(cuid())
+  quantity   Int
+  price      Decimal  @db.Decimal(10, 2)
+  frameSize  FrameSize
+  frameType  FrameType
+  engravingText String?
+  
+  // Relationships
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId    String
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  String
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+// Category model
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  image     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  // Relationships
+  products  Product[]
+}
+
+// Review model
+model Review {
+  id           String   @id @default(cuid())
+  rating       Int      @db.SmallInt // 1-5 star rating
+  comment      String   @db.Text
+  customerName String
+  createdAt    DateTime @default(now())
+  
+  // Relationships
+  product    Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId  String
+}
+
+// Cart model
+model Cart {
+  id        String   @id @default(cuid())
+  cartId    String   @unique // Cookie-based identifier
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  cartItems CartItem[]
+}
+
+model CartItem {
+  id          String   @id @default(cuid())
+  quantity    Int
+  frameSize   FrameSize
+  frameType   FrameType
+  engravingText String?
+  
+  // Map data
+  latitude   Float?
+  longitude  Float?
+  mapAddress String?
+  
+  // Relationships
+  cart       Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cartId     String
+  productId  String
+}
