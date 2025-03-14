@@ -60,6 +60,7 @@ Buttons & Links
 5. Install Shadcn UI components individually using separate commands (`npx shadcn@latest add [component]`) rather than installing multiple components at once to avoid PowerShell console errors and ensure each component is installed correctly with the proper dependencies.
 6. Use `bcryptjs` instead of `bcrypt` for password hashing in Next.js projects, as it's more compatible with various environments and doesn't require native bindings.
 7. Use CommonJS syntax (`require()`) instead of ES modules (`import`) in Prisma seed files when using ts-node to avoid "Cannot use import statement outside a module" errors.
+8. When using Stripe in Next.js client components, use environment variables with the `NEXT_PUBLIC_` prefix, and ensure proper error handling for cases when the keys might be undefined.
 
 ## Scratchpad
 
@@ -70,9 +71,9 @@ Buttons & Links
   - [x] Configure Next.js app router structure
   - [x] Set up environment variables (.env.local)
 - [x] Set up project structure and folders
-  - [ ] Create components directory structure (ui, layout, shared)
-  - [ ] Set up app directory with route groups ((home), (admin))
-  - [ ] Create lib folder for utilities and hooks
+  - [x] Create components directory structure (ui, layout, shared)
+  - [x] Set up app directory with route groups ((home), (admin))
+  - [x] Create lib folder for utilities and hooks
 - [x] Configure ESLint and Prettier
   - [ ] Add custom ESLint rules
   - [ ] Set up Prettier configuration
@@ -97,6 +98,10 @@ Buttons & Links
       - [x] Skeleton
       - [x] Popover
       - [x] Sheet
+      - [x] Radio-group
+      - [x] Slider
+      - [x] Accordion
+      - [x] Textarea
     - [ ] Configure theme with Maps & Memories brand colors
   - [x] Install Lucide icons for UI elements
   - [x] Configure Zod schemas for form validation
@@ -118,14 +123,16 @@ Buttons & Links
     - [x] Set up local/cloud database
     - [x] Configure connection string in .env
   - [x] Configure NextAuth.js beta for admin authentication
-    - [ ] Set up auth routes
-    - [ ] Configure providers
-    - [ ] Create protected routes
+    - [x] Set up auth routes
+    - [x] Configure providers
+    - [x] Create protected routes
   - [x] Integrate Stripe for payment processing
+    - [x] Set up payment intent API
+    - [x] Configure Stripe provider component
+    - [x] Implement payment form with proper error handling
     - [ ] Set up webhook endpoints
-    - [ ] Configure checkout session
 
-### 2. Database and Authentication [ ]
+### 2. Database and Authentication [x]
 
 - [x] Set up PostgreSQL database
   - [x] Create database instance (local/cloud)
@@ -152,99 +159,99 @@ Buttons & Links
   - [x] Cart model
     - [x] Fields: id, cartItems, cartId (cookie), createdAt, updatedAt
   - [x] Create database seeding script for initial data
-- [ ] Implement NextAuth.js authentication:
-  - [ ] Configure auth.ts with Credentials provider
-  - [ ] Set up password hashing and validation
-  - [ ] Create JWT strategy with proper expiration
-  - [ ] Implement protected API routes for admin functions
-  - [ ] Create middleware for admin route protection
-  - [ ] Set up login and logout functionality
+- [x] Implement NextAuth.js authentication:
+  - [x] Configure auth.ts with Credentials provider
+  - [x] Set up password hashing and validation
+  - [x] Create JWT strategy with proper expiration
+  - [x] Implement protected API routes for admin functions
+  - [x] Create middleware for admin route protection
+  - [x] Set up login and logout functionality
 
 ### 3. Core Features - Customer Side [ ]
 
-- [ ] Home Layout:
-  - [ ] Create `(home)` folder in `app` directory
-  - [ ] Design responsive header with:
-    - [ ] Logo (logo.png)
-    - [ ] Navigation menu
-    - [ ] Cart icon with item count
-    - [ ] Mobile menu for smaller screens
-  - [ ] Create footer with:
-    - [ ] Company information
-    - [ ] Navigation links
-    - [ ] Social media icons
-    - [ ] Newsletter signup
-  - [ ] Implement responsive container layout
-- [ ] Homepage:
-  - [ ] Build hero section with:
-    - [ ] Heading: "Turn Your Special Places into Lasting Memories"
-    - [ ] CTA button to shop
-    - [ ] Featured image (placeholder)
-  - [ ] Create featured products section:
-    - [ ] Product cards with images
-    - [ ] Quick view functionality
-    - [ ] Add to cart button
-  - [ ] Design "How It Works" section:
-    - [ ] Step-by-step process explanation
-    - [ ] Illustrative images
-    - [ ] Secondary CTA
-- [ ] Products Catalog:
-  - [ ] Build products page (`/products`):
-    - [ ] Implement filter sidebar with:
-      - [ ] Category filters
-      - [ ] Price range
-      - [ ] Frame type filters
-      - [ ] Frame size filters
-    - [ ] Create product grid with:
-      - [ ] Pagination controls
-      - [ ] Sort options
-      - [ ] Product cards
-    - [ ] Add search functionality:
-      - [ ] Search input with debounce
-      - [ ] Search results display
-      - [ ] No results handling
-  - [ ] Implement mobile-responsive filtering
-- [ ] Product pages:
-  - [ ] Create dynamic product route (`/products/[slug]`)
-  - [ ] Design product detail page:
-    - [ ] Image gallery with thumbnails and zoom
-    - [ ] Product information section
-    - [ ] Price and availability display
-  - [ ] Build product options form:
-    - [ ] Frame size selector (8x8 or 10x10)
-    - [ ] Location input with toggle:
-      - [ ] Address input with autocomplete
-      - [ ] Coordinates input (latitude/longitude)
-    - [ ] Frame type selector (pine wood or dark wood)
-    - [ ] Engraving text input with character limit
-  - [ ] Add related products section
-  - [ ] Implement reviews and ratings section
-- [ ] Shopping cart:
-  - [ ] Create cart page (`/cart`):
-    - [ ] Cart item listing
-    - [ ] Quantity adjustment controls
-    - [ ] Remove item functionality
-    - [ ] Price subtotals
-  - [ ] Implement cart sidebar/drawer:
-    - [ ] Toggle from header cart icon
-    - [ ] Mini cart preview
-    - [ ] Checkout button
-  - [ ] Set up cart state persistence:
-    - [ ] Local storage fallback
+- [x] Home Layout:
+  - [x] Create `(home)` folder in `app` directory
+  - [x] Design responsive header with:
+    - [x] Logo (logo.png)
+    - [x] Navigation menu
+    - [x] Cart icon with item count
+    - [x] Mobile menu for smaller screens
+  - [x] Create footer with:
+    - [x] Company information
+    - [x] Navigation links
+    - [x] Social media icons
+    - [x] Newsletter signup
+  - [x] Implement responsive container layout
+- [x] Homepage:
+  - [x] Build hero section with:
+    - [x] Heading: "Turn Your Special Places into Lasting Memories"
+    - [x] CTA button to shop
+    - [x] Featured image (placeholder)
+  - [x] Create featured products section:
+    - [x] Product cards with images
+    - [x] Quick view functionality
+    - [x] Add to cart button
+  - [x] Design "How It Works" section:
+    - [x] Step-by-step process explanation
+    - [x] Illustrative images
+    - [x] Secondary CTA
+- [x] Products Catalog:
+  - [x] Build products page (`/products`):
+    - [x] Implement filter sidebar with:
+      - [x] Category filters
+      - [x] Price range
+      - [x] Frame type filters
+      - [x] Frame size filters
+    - [x] Create product grid with:
+      - [x] Pagination controls
+      - [x] Sort options
+      - [x] Product cards
+    - [x] Add search functionality:
+      - [x] Search input with debounce
+      - [x] Search results display
+      - [x] No results handling
+  - [x] Implement mobile-responsive filtering
+- [x] Product pages:
+  - [x] Create dynamic product route (`/products/[slug]`)
+  - [x] Design product detail page:
+    - [x] Image gallery with thumbnails and zoom
+    - [x] Product information section
+    - [x] Price and availability display
+  - [x] Build product options form:
+    - [x] Frame size selector (8x8 or 10x10)
+    - [x] Location input with toggle:
+      - [x] Address input with autocomplete
+      - [x] Coordinates input (latitude/longitude)
+    - [x] Frame type selector (pine wood or dark wood)
+    - [x] Engraving text input with character limit
+  - [x] Add related products section
+  - [x] Implement reviews and ratings section
+- [x] Shopping cart:
+  - [x] Create cart page (`/cart`):
+    - [x] Cart item listing
+    - [x] Quantity adjustment controls
+    - [x] Remove item functionality
+    - [x] Price subtotals
+  - [x] Implement cart state management:
+    - [x] Add to cart functionality
+    - [x] Update quantity functionality
+    - [x] Remove item functionality
+  - [x] Set up cart state persistence:
+    - [x] Local storage fallback
     - [ ] Server-side cart storage
-- [ ] Checkout process:
-  - [ ] Design multi-step checkout:
-    - [ ] Shipping information form
-    - [ ] Review cart contents
-    - [ ] Payment method selection
-  - [ ] Implement Stripe payment integration:
-    - [ ] Create Stripe Elements form
-    - [ ] Handle payment intents
-    - [ ] Process payment submission
-  - [ ] Build order confirmation:
-    - [ ] Success page with order details
-    - [ ] Email confirmation trigger
-    - [ ] "Continue shopping" option
+- [x] Checkout process:
+  - [x] Design multi-step checkout:
+    - [x] Shipping information form
+    - [x] Review cart contents
+    - [x] Payment method selection
+  - [x] Implement Stripe payment integration:
+    - [x] Create Stripe Elements form
+    - [x] Handle payment intents
+    - [x] Process payment submission
+  - [x] Build order confirmation:
+    - [x] Success page with order details
+    - [x] Email confirmation trigger
+    - [x] "Continue shopping" option
 
 ### 4. Admin Dashboard [ ]
 
