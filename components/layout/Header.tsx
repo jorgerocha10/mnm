@@ -66,6 +66,8 @@ const MobileNav = () => (
 );
 
 export default function Header() {
+  // Subscribe to both the items array and the getItemCount function
+  const items = useCartStore((state) => state.items);
   const getItemCount = useCartStore((state) => state.getItemCount);
   const [cartItemCount, setCartItemCount] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
@@ -75,12 +77,12 @@ export default function Header() {
     setIsMounted(true);
   }, []);
   
-  // Update cart count when it changes
+  // Update cart count when items change
   useEffect(() => {
     if (isMounted) {
       setCartItemCount(getItemCount());
     }
-  }, [isMounted, getItemCount]);
+  }, [isMounted, getItemCount, items]); // Add items dependency to re-run when cart changes
 
   return (
     <header className="bg-[#F7F5F6] border-b border-gray-200">

@@ -8,16 +8,17 @@ import ProductReviews from '@/components/products/ProductReviews';
 import { Separator } from '@/components/ui/separator';
 
 interface ProductPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 // Generate metadata for the product page
 export async function generateMetadata({
   params,
 }: ProductPageProps): Promise<Metadata> {
-  const product = await getProduct(params.slug);
+  const { slug } = await params;
+  const product = await getProduct(slug);
   
   if (!product) {
     return {
@@ -54,6 +55,11 @@ async function getProduct(slug: string) {
       price: product.price.toString(),
       createdAt: product.createdAt.toISOString(),
       updatedAt: product.updatedAt.toISOString(),
+      category: product.category ? {
+        ...product.category,
+        createdAt: product.category.createdAt.toISOString(),
+        updatedAt: product.category.updatedAt.toISOString(),
+      } : null,
       reviews: product.reviews.map(review => ({
         ...review,
         createdAt: review.createdAt.toISOString(),
@@ -91,6 +97,11 @@ async function getRelatedProducts(categoryId: string | null, currentProductId: s
       price: product.price.toString(),
       createdAt: product.createdAt.toISOString(),
       updatedAt: product.updatedAt.toISOString(),
+      category: product.category ? {
+        ...product.category,
+        createdAt: product.category.createdAt.toISOString(),
+        updatedAt: product.category.updatedAt.toISOString(),
+      } : null,
     }));
     
     return serializedProducts;
@@ -101,7 +112,8 @@ async function getRelatedProducts(categoryId: string | null, currentProductId: s
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  const product = await getProduct(params.slug);
+  const { slug } = await params;
+  const product = await getProduct(slug);
   
   if (!product) {
     notFound();

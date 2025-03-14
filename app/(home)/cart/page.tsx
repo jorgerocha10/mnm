@@ -142,33 +142,10 @@ export default function CartPage() {
                     
                     {/* Quantity */}
                     <div className="col-span-2 flex justify-center">
-                      <div className="flex items-center border border-[#95A7B5] rounded-md">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          className="h-8 w-8 p-0"
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          disabled={item.quantity <= 1}
-                        >
-                          -
-                        </Button>
-                        <Input
-                          type="number"
-                          min="1"
-                          max="10"
-                          value={item.quantity}
-                          onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
-                          className="h-8 w-10 text-center border-0"
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          className="h-8 w-8 p-0"
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          disabled={item.quantity >= 10}
-                        >
-                          +
-                        </Button>
+                      <div className="flex items-center justify-center px-3 py-2 bg-[#F7F5F6] rounded-md">
+                        <span className="font-medium text-[#253946]">
+                          {item.quantity}
+                        </span>
                       </div>
                     </div>
                     

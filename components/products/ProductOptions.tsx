@@ -18,9 +18,39 @@ import {
 } from '@/components/ui/tabs';
 import { toast } from "sonner";
 import { useCartStore } from '@/lib/store/cart-store';
+import InteractiveMap from './InteractiveMap';
 
 interface ProductOptionsProps {
-  product: Product;
+  product: {
+    id: string;
+    name: string;
+    slug: string;
+    description: string;
+    price: string;
+    images: string[];
+    stock: number;
+    frameTypes: string | string[];
+    frameSizes: string | string[];
+    createdAt: string;
+    updatedAt: string;
+    categoryId: string | null;
+    category?: {
+      id: string;
+      name: string;
+      slug: string;
+      image: string | null;
+      createdAt: string;
+      updatedAt: string;
+    } | null;
+    reviews: {
+      id: string;
+      rating: number;
+      comment: string;
+      customerName: string;
+      productId: string;
+      createdAt: string;
+    }[];
+  };
 }
 
 export default function ProductOptions({ product }: ProductOptionsProps) {
@@ -45,6 +75,23 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
   const [longitude, setLongitude] = useState<string>('');
   const [engravingText, setEngravingText] = useState<string>('');
   const [quantity, setQuantity] = useState(1);
+  const [mapZoom, setMapZoom] = useState(13);
+  
+  // Handle location selection from map
+  const handleLocationSelect = (location: {
+    address?: string;
+    coordinates: { lat: number; lng: number };
+    zoom: number;
+  }) => {
+    if (location.address) {
+      setAddress(location.address);
+      setLocationType('address');
+    }
+    
+    setLatitude(location.coordinates.lat.toString());
+    setLongitude(location.coordinates.lng.toString());
+    setMapZoom(location.zoom);
+  };
   
   // Handle add to cart
   const handleAddToCart = () => {
@@ -72,6 +119,7 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
         location: locationType === 'address' ? address : `${latitude},${longitude}`,
         locationType,
         engravingText,
+        mapZoom,
       }
     };
     
@@ -154,6 +202,17 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
         <div className="flex items-center space-x-2 mb-3">
           <MapPin className="w-4 h-4 text-[#A76825]" />
           <h3 className="text-sm font-medium text-[#253946]">Location</h3>
+        </div>
+        
+        {/* Interactive Map */}
+        <div className="mb-6">
+          <InteractiveMap
+            frameType={frameType}
+            frameSize={frameSize}
+            initialAddress={address}
+            initialCoordinates={latitude && longitude ? { lat: parseFloat(latitude), lng: parseFloat(longitude) } : undefined}
+            onLocationSelect={handleLocationSelect}
+          />
         </div>
         
         <Tabs 
@@ -260,16 +319,18 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
           </Button>
         </div>
         
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+        <div className="flex flex-1 gap-3">
           <Button
+            type="button"
             variant="outline"
-            className="border-[#A76825] text-[#A76825] hover:bg-[#A76825]/10 sm:min-w-[140px]"
+            className="flex-1 border-[#95A7B5] text-[#253946] hover:bg-[#95A7B5]/10"
             onClick={handleAddToCart}
           >
             Add to Cart
           </Button>
           <Button
-            className="bg-[#A76825] hover:bg-[#8a561e] text-white sm:min-w-[140px]"
+            type="button"
+            className="flex-1 bg-[#A76825] hover:bg-[#8a561e] text-white"
             onClick={handleBuyNow}
           >
             Buy Now

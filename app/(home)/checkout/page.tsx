@@ -135,6 +135,20 @@ export default function CheckoutPage() {
     }
   };
   
+  // Helper function to determine progress indicator styling
+  const getProgressIndicatorClass = (step: CheckoutStep) => {
+    if (currentStep === step) {
+      return 'bg-[#A76825] text-white'; // Current step
+    } else if (
+      (step === 'review' && ['payment', 'complete'].includes(currentStep)) ||
+      (step === 'payment' && currentStep === 'complete')
+    ) {
+      return 'bg-[#D2BDA2] text-white'; // Completed step
+    } else {
+      return 'bg-[#F7F5F6] text-[#95A7B5]'; // Future step
+    }
+  };
+  
   return (
     <div className="container max-w-4xl mx-auto py-8 px-4 sm:px-6">
       {/* Progress header */}
@@ -145,7 +159,7 @@ export default function CheckoutPage() {
           <div className="flex items-center justify-between max-w-xl mx-auto">
             <div className="flex flex-col items-center">
               <div className={`h-8 w-8 rounded-full flex items-center justify-center font-medium ${
-                currentStep === 'shipping' ? 'bg-[#A76825] text-white' : 'bg-[#D2BDA2] text-white'
+                getProgressIndicatorClass('shipping')
               }`}>
                 1
               </div>
@@ -156,8 +170,7 @@ export default function CheckoutPage() {
             
             <div className="flex flex-col items-center">
               <div className={`h-8 w-8 rounded-full flex items-center justify-center font-medium ${
-                currentStep === 'review' ? 'bg-[#A76825] text-white' : 
-                (currentStep === 'payment' || currentStep === 'complete') ? 'bg-[#D2BDA2] text-white' : 'bg-[#F7F5F6] text-[#95A7B5]'
+                getProgressIndicatorClass('review')
               }`}>
                 2
               </div>
@@ -168,8 +181,7 @@ export default function CheckoutPage() {
             
             <div className="flex flex-col items-center">
               <div className={`h-8 w-8 rounded-full flex items-center justify-center font-medium ${
-                currentStep === 'payment' ? 'bg-[#A76825] text-white' : 
-                currentStep === 'complete' ? 'bg-[#D2BDA2] text-white' : 'bg-[#F7F5F6] text-[#95A7B5]'
+                getProgressIndicatorClass('payment')
               }`}>
                 3
               </div>

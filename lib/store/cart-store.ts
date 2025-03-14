@@ -7,6 +7,7 @@ export type CartItemOption = {
   location: string;
   locationType: 'address' | 'coordinates';
   engravingText?: string;
+  mapZoom?: number;
 };
 
 export type CartItem = {

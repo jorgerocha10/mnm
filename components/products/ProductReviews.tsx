@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Review } from '@prisma/client';
 import { Star, StarHalf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,9 +8,18 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 
+interface SerializedReview {
+  id: string;
+  rating: number;
+  comment: string;
+  customerName: string;
+  productId: string;
+  createdAt: string;
+}
+
 interface ProductReviewsProps {
   productId: string;
-  reviews: Review[];
+  reviews: SerializedReview[];
   averageRating: number;
 }
 

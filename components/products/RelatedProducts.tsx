@@ -1,16 +1,36 @@
 'use client';
 
-import { Product, Category } from '@prisma/client';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 
-interface ProductWithCategory extends Product {
-  category: Category | null;
+interface SerializedCategory {
+  id: string;
+  name: string;
+  slug: string;
+  image: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface SerializedProduct {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  price: string;
+  images: string[];
+  stock: number;
+  frameTypes: string | string[];
+  frameSizes: string | string[];
+  createdAt: string;
+  updatedAt: string;
+  categoryId: string | null;
+  category: SerializedCategory | null;
 }
 
 interface RelatedProductsProps {
-  products: ProductWithCategory[];
+  products: SerializedProduct[];
   categoryName: string;
 }
 
@@ -40,7 +60,7 @@ export default function RelatedProducts({ products, categoryName }: RelatedProdu
                 </h3>
                 <div className="flex justify-between items-center mt-auto">
                   <span className="text-[#253946] font-medium">
-                    ${product.price.toString()}
+                    ${product.price}
                   </span>
                   <span className="text-[#95A7B5] text-sm">
                     {product.category?.name}
