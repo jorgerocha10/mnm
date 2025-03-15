@@ -53,6 +53,19 @@ const frameTypeLabels: Record<string, string> = {
 // All available frame types
 const allFrameTypes = ['PINE', 'DARK'];
 
+// Get all available frame sizes for the dropdown
+const allFrameSizes = [
+  'SIZE_6X6',
+  'SIZE_8_5X8_5',
+  'SIZE_8_5X12',
+  'SIZE_12X12',
+  'SIZE_12X16',
+  'SIZE_16X16',
+  'SIZE_16X20',
+  'SIZE_20X20',
+  'SIZE_20X28'
+];
+
 interface ProductOptionsProps {
   product: {
     id: string;
@@ -196,19 +209,6 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
     if (value > 10) return;
     setQuantity(value);
   };
-  
-  // Get all available frame sizes for the dropdown
-  const allFrameSizes = [
-    'SIZE_6X6',
-    'SIZE_8_5X8_5',
-    'SIZE_8_5X12',
-    'SIZE_12X12',
-    'SIZE_12X16',
-    'SIZE_16X16',
-    'SIZE_16X20',
-    'SIZE_20X20',
-    'SIZE_20X28'
-  ];
   
   return (
     <div className="space-y-6">

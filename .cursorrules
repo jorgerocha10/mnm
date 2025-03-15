@@ -61,6 +61,7 @@ Buttons & Links
 6. Use `bcryptjs` instead of `bcrypt` for password hashing in Next.js projects, as it's more compatible with various environments and doesn't require native bindings.
 7. Use CommonJS syntax (`require()`) instead of ES modules (`import`) in Prisma seed files when using ts-node to avoid "Cannot use import statement outside a module" errors.
 8. When using Stripe in Next.js client components, use environment variables with the `NEXT_PUBLIC_` prefix, and ensure proper error handling for cases when the keys might be undefined.
+9. Always declare variables before they are used in JavaScript/TypeScript. Unlike function declarations which are hoisted completely, variables declared with `const` and `let` are not initialized until the declaration is evaluated. This can lead to "Cannot access 'variable' before initialization" errors. For shared constants like enum values or arrays, define them at the top of the file outside any functions.
 
 ## Scratchpad
 
