@@ -1,29 +1,23 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  images: {
+    domains: [
+      "placehold.co",
+      "utfs.io",
+    ],
+  },
   eslint: {
-    // Disable ESLint during production builds
+    // Warning: This allows production builds to successfully complete even if
+    // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
   typescript: {
-    // Disable TypeScript errors during production builds (use with caution)
+    // !! WARN !!
+    // Dangerously allow production builds to successfully complete even if
+    // your project has type errors.
+    // !! WARN !!
     ignoreBuildErrors: true,
-  },
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'placehold.co',
-      },
-      {
-        protocol: 'https',
-        hostname: 'maps.googleapis.com',
-      },
-      {
-        protocol: 'https',
-        hostname: '*.googleapis.com',
-      }
-    ],
   },
 };
 
-module.exports = nextConfig; 
+module.exports = nextConfig;

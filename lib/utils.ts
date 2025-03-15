@@ -6,15 +6,23 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * Formats a number as currency
- * @param amount - The amount to format
- * @param currency - The currency code (default: USD)
- * @returns Formatted currency string
+ * Formats a date to a human-readable string
  */
-export function formatCurrency(amount: number, currency: string = 'USD'): string {
+export function formatDate(date: Date): string {
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }).format(new Date(date));
+}
+
+/**
+ * Formats a number as currency
+ */
+export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency,
+    currency: 'USD',
     minimumFractionDigits: 2,
   }).format(amount);
 }

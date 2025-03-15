@@ -161,6 +161,41 @@ export default function InteractiveMap({
     }
   }, [isLoaded, mapRef.current]);
 
+  // Add a resize handler to ensure map resizes with container
+  useEffect(() => {
+    if (!map) return;
+
+    const handleResize = () => {
+      if (map && window.google) {
+        window.google.maps.event.trigger(map, 'resize');
+        
+        // Re-center the map on the marker if it exists
+        if (marker && marker.getPosition()) {
+          map.setCenter(marker.getPosition());
+        }
+      }
+    };
+
+    // Create a ResizeObserver to detect container size changes
+    if (typeof ResizeObserver !== 'undefined' && mapRef.current) {
+      const resizeObserver = new ResizeObserver(handleResize);
+      resizeObserver.observe(mapRef.current);
+      
+      return () => {
+        if (mapRef.current) {
+          resizeObserver.unobserve(mapRef.current);
+        }
+        resizeObserver.disconnect();
+      };
+    }
+
+    // Fallback to window resize listener
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [map, marker]);
+
   const initializeMap = () => {
     if (!mapRef.current || !window.google || !window.google.maps) {
       setLoadError('Google Maps failed to initialize. Please refresh the page.');
@@ -355,23 +390,23 @@ export default function InteractiveMap({
     // Special dimensions for key holder sizes
     if (frameSize === 'SIZE_4_5X8_5') {
       return orientation === 'horizontal' 
-        ? 'w-[510px] h-[270px]'  // Scaled dimensions for 4.5" × 8.5"
-        : 'w-[270px] h-[510px]';
+        ? 'aspect-[1.89/1] w-full max-w-[510px]'  // 4.5" × 8.5" (aspect ratio ~1.89:1)
+        : 'aspect-[0.53/1] w-full max-w-[270px]';  // 8.5" × 4.5" (aspect ratio ~0.53:1)
     }
     if (frameSize === 'SIZE_6X12') {
       return orientation === 'horizontal'
-        ? 'w-[600px] h-[300px]'  // Scaled dimensions for 6" × 12"
-        : 'w-[300px] h-[600px]';
+        ? 'aspect-[2/1] w-full max-w-[600px]'  // 6" × 12" (aspect ratio 2:1)
+        : 'aspect-[0.5/1] w-full max-w-[300px]';  // 12" × 6" (aspect ratio 0.5:1)
     }
     
     // Default dimensions for other sizes
     if (isSquare) {
-      return 'w-[480px] h-[480px]';
+      return 'aspect-[1/1] w-full max-w-[480px]';  // Square (aspect ratio 1:1)
     }
     
     return orientation === 'horizontal' 
-      ? 'w-[630px] h-[480px]' 
-      : 'w-[480px] h-[630px]';
+      ? 'aspect-[1.31/1] w-full max-w-[630px]'  // Horizontal rectangle (aspect ratio ~1.31:1)
+      : 'aspect-[0.76/1] w-full max-w-[480px]';  // Vertical rectangle (aspect ratio ~0.76:1)
   };
 
   return (
@@ -431,7 +466,7 @@ export default function InteractiveMap({
         </Alert>
       )}
 
-      <div className="relative flex justify-center">
+      <div className="relative flex justify-center w-full">
         {/* Map container with frame styling applied directly */}
         <div 
           ref={mapRef} 
@@ -457,11 +492,9 @@ export default function InteractiveMap({
           {loadError && (
             <div className="text-center p-4 absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 z-10">
               <div 
-                className="w-full h-full bg-cover bg-center" 
+                className="w-full h-full bg-cover bg-center"
                 style={{ 
-                  backgroundImage: "url('https://placehold.co/600x400/95A7B5/FFFFFF?text=Map+Preview')",
-                  width: isSquare ? '420px' : orientation === 'horizontal' ? '570px' : '420px',
-                  height: isSquare ? '420px' : orientation === 'horizontal' ? '420px' : '570px',
+                  backgroundImage: "url('https://placehold.co/600x400/95A7B5/FFFFFF?text=Map+Preview')"
                 }}
               />
             </div>
