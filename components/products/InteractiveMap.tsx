@@ -35,6 +35,9 @@ interface InteractiveMapProps {
   frameSize: string;
   initialAddress?: string;
   initialCoordinates?: { lat: number; lng: number };
+  showRotate?: boolean;
+  orientation?: 'horizontal' | 'vertical';
+  onOrientationChange?: (orientation: 'horizontal' | 'vertical') => void;
   onLocationSelect: (location: {
     address?: string;
     coordinates: { lat: number; lng: number };
@@ -47,6 +50,9 @@ export default function InteractiveMap({
   frameSize,
   initialAddress,
   initialCoordinates,
+  showRotate = false,
+  orientation = 'horizontal',
+  onOrientationChange,
   onLocationSelect,
 }: InteractiveMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -344,10 +350,28 @@ export default function InteractiveMap({
     'SIZE_20X20'
   ].includes(frameSize);
 
-  // Calculate frame dimensions based on size
+  // Calculate frame dimensions based on size and orientation
   const getFrameDimensions = () => {
-    // Return appropriate dimensions based on aspect ratio (increased by 1.5x)
-    return isSquare ? 'w-[480px] h-[480px]' : 'w-[630px] h-[480px]';
+    // Special dimensions for key holder sizes
+    if (frameSize === 'SIZE_4_5X8_5') {
+      return orientation === 'horizontal' 
+        ? 'w-[510px] h-[270px]'  // Scaled dimensions for 4.5" × 8.5"
+        : 'w-[270px] h-[510px]';
+    }
+    if (frameSize === 'SIZE_6X12') {
+      return orientation === 'horizontal'
+        ? 'w-[600px] h-[300px]'  // Scaled dimensions for 6" × 12"
+        : 'w-[300px] h-[600px]';
+    }
+    
+    // Default dimensions for other sizes
+    if (isSquare) {
+      return 'w-[480px] h-[480px]';
+    }
+    
+    return orientation === 'horizontal' 
+      ? 'w-[630px] h-[480px]' 
+      : 'w-[480px] h-[630px]';
   };
 
   return (
@@ -373,6 +397,30 @@ export default function InteractiveMap({
           >
             Search
           </Button>
+          {showRotate && !isSquare && (
+            <Button
+              type="button"
+              variant="outline"
+              className="ml-2 border-[#95A7B5] text-[#253946] hover:bg-[#95A7B5]/10"
+              onClick={() => onOrientationChange?.(orientation === 'horizontal' ? 'vertical' : 'horizontal')}
+            >
+              <svg
+                className={`w-4 h-4 transition-transform ${orientation === 'vertical' ? 'rotate-90' : ''}`}
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3" />
+                <path d="M9 21h6" />
+                <path d="M12 17v4" />
+                <path d="M3 11h18" />
+              </svg>
+            </Button>
+          )}
         </form>
       </div>
 
@@ -412,8 +460,8 @@ export default function InteractiveMap({
                 className="w-full h-full bg-cover bg-center" 
                 style={{ 
                   backgroundImage: "url('https://placehold.co/600x400/95A7B5/FFFFFF?text=Map+Preview')",
-                  width: isSquare ? '420px' : '570px',
-                  height: isSquare ? '420px' : '420px',
+                  width: isSquare ? '420px' : orientation === 'horizontal' ? '570px' : '420px',
+                  height: isSquare ? '420px' : orientation === 'horizontal' ? '420px' : '570px',
                 }}
               />
             </div>

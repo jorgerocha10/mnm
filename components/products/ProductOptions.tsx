@@ -37,6 +37,8 @@ const frameSizeLabels: Record<string, string> = {
   'SIZE_16X20': '16" × 20"',
   'SIZE_20X20': '20" × 20"',
   'SIZE_20X28': '20" × 28"',
+  'SIZE_4_5X8_5': '4.5" × 8.5"',
+  'SIZE_6X12': '6" × 12"',
   // Keep legacy mappings for backward compatibility
   'SMALL': '8.5" × 8.5"',
   'LARGE': '12" × 12"',
@@ -88,18 +90,17 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
   const router = useRouter();
   const addItem = useCartStore((state) => state.addItem);
   
+  // Get available frame sizes based on category
+  const getAvailableFrameSizes = () => {
+    if (product.category?.name === 'Key holders') {
+      return ['SIZE_4_5X8_5', 'SIZE_6X12'];
+    }
+    return allFrameSizes;
+  };
+
   // Frame type and size options
-  const frameSizes = Array.isArray(product.frameSizes) 
-    ? product.frameSizes 
-    : [product.frameSizes];
-  
-  // We'll replace this with our hardcoded array
-  // const frameTypes = Array.isArray(product.frameTypes)
-  //   ? product.frameTypes
-  //   : [product.frameTypes];
-  
-  // Form state
-  const [frameSize, setFrameSize] = useState<string>(frameSizes[0]);
+  const availableFrameSizes = getAvailableFrameSizes();
+  const [frameSize, setFrameSize] = useState<string>(availableFrameSizes[0]);
   const [frameType, setFrameType] = useState<string>(
     Array.isArray(product.frameTypes) ? product.frameTypes[0] : product.frameTypes
   );
@@ -110,6 +111,19 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
   const [engravingText, setEngravingText] = useState<string>('');
   const [quantity, setQuantity] = useState(1);
   const [mapZoom, setMapZoom] = useState(13);
+  const [mapOrientation, setMapOrientation] = useState<'horizontal' | 'vertical'>('horizontal');
+  
+  // Check if product is in Multi layers or Bas relief category
+  const allowRotation = product.category?.name === 'Multi layers' || product.category?.name === 'Bas Relief';
+  
+  // Determine if the current frame size is square
+  const isSquare = [
+    'SIZE_6X6', 
+    'SIZE_8_5X8_5', 
+    'SIZE_12X12', 
+    'SIZE_16X16', 
+    'SIZE_20X20'
+  ].includes(frameSize);
   
   // Handle location selection from map
   const handleLocationSelect = (location: {
@@ -125,6 +139,11 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
     setLatitude(location.coordinates.lat.toString());
     setLongitude(location.coordinates.lng.toString());
     setMapZoom(location.zoom);
+  };
+  
+  // Handle orientation change
+  const handleOrientationChange = (newOrientation: 'horizontal' | 'vertical') => {
+    setMapOrientation(newOrientation);
   };
   
   // Handle add to cart
@@ -154,6 +173,7 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
         locationType,
         engravingText,
         mapZoom,
+        mapOrientation: !isSquare && allowRotation ? mapOrientation : undefined,
       }
     };
     
@@ -203,7 +223,7 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
             <SelectValue placeholder="Select a frame size" />
           </SelectTrigger>
           <SelectContent>
-            {allFrameSizes.map((size) => (
+            {availableFrameSizes.map((size) => (
               <SelectItem key={size} value={size}>
                 {frameSizeLabels[size]}
               </SelectItem>
@@ -247,6 +267,9 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
             initialAddress={address}
             initialCoordinates={latitude && longitude ? { lat: parseFloat(latitude), lng: parseFloat(longitude) } : undefined}
             onLocationSelect={handleLocationSelect}
+            showRotate={allowRotation}
+            orientation={mapOrientation}
+            onOrientationChange={handleOrientationChange}
           />
         </div>
         

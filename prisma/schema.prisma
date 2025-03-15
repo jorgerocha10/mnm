@@ -66,6 +66,7 @@ model OrderItem {
   productId     String
   mapZoom       Int?       @default(13)
   frameSize     FrameSize?
+  mapOrientation String?   @default("horizontal")
   order         Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product       Product    @relation(fields: [productId], references: [id])
 }
@@ -135,6 +136,8 @@ enum FrameSize {
   SIZE_16X20
   SIZE_20X20
   SIZE_20X28
+  SIZE_4_5X8_5
+  SIZE_6X12
 }
 
 enum OrderStatus {
