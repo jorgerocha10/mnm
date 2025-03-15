@@ -335,9 +335,19 @@ export default function InteractiveMap({
     });
   };
 
+  // Determine if the frame size is square or rectangular
+  const isSquare = [
+    'SIZE_6X6', 
+    'SIZE_8_5X8_5', 
+    'SIZE_12X12', 
+    'SIZE_16X16', 
+    'SIZE_20X20'
+  ].includes(frameSize);
+
   // Calculate frame dimensions based on size
   const getFrameDimensions = () => {
-    return frameSize === '8x8' ? 'w-[320px] h-[320px]' : 'w-[400px] h-[400px]';
+    // Return appropriate dimensions based on aspect ratio (increased by 1.5x)
+    return isSquare ? 'w-[480px] h-[480px]' : 'w-[630px] h-[480px]';
   };
 
   return (
@@ -379,8 +389,8 @@ export default function InteractiveMap({
           ref={mapRef} 
           className={`${getFrameDimensions()} relative rounded-sm overflow-hidden shadow-lg flex items-center justify-center bg-gray-100`}
           style={{
-            border: `20px solid ${frameType === 'pine' ? '#D2BDA2' : '#3E2723'}`,
-            backgroundImage: frameType === 'pine' 
+            border: `20px solid ${frameType === 'PINE' ? '#D2BDA2' : '#3E2723'}`,
+            backgroundImage: frameType === 'PINE' 
               ? 'linear-gradient(45deg, rgba(210, 189, 162, 0.8) 25%, rgba(200, 175, 145, 0.8) 25%, rgba(200, 175, 145, 0.8) 50%, rgba(210, 189, 162, 0.8) 50%, rgba(210, 189, 162, 0.8) 75%, rgba(200, 175, 145, 0.8) 75%, rgba(200, 175, 145, 0.8) 100%)'
               : 'linear-gradient(45deg, rgba(62, 39, 35, 0.8) 25%, rgba(51, 32, 29, 0.8) 25%, rgba(51, 32, 29, 0.8) 50%, rgba(62, 39, 35, 0.8) 50%, rgba(62, 39, 35, 0.8) 75%, rgba(51, 32, 29, 0.8) 75%, rgba(51, 32, 29, 0.8) 100%)',
             backgroundSize: '20px 20px',
@@ -402,8 +412,8 @@ export default function InteractiveMap({
                 className="w-full h-full bg-cover bg-center" 
                 style={{ 
                   backgroundImage: "url('https://placehold.co/600x400/95A7B5/FFFFFF?text=Map+Preview')",
-                  width: frameSize === '8x8' ? '280px' : '360px',
-                  height: frameSize === '8x8' ? '280px' : '360px',
+                  width: isSquare ? '420px' : '570px',
+                  height: isSquare ? '420px' : '420px',
                 }}
               />
             </div>

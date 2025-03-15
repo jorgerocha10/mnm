@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,41 +7,115 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Admin model for authentication
 model Admin {
   id        String   @id @default(cuid())
   name      String
   email     String   @unique
-  password  String   // Hashed password
+  password  String
   role      Role     @default(ADMIN)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
+model Product {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  description String
+  price       Decimal     @db.Decimal(10, 2)
+  images      String[]
+  stock       Int         @default(0)
+  frameTypes  FrameType   @default(PINE)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  categoryId  String?
+  frameSizes  FrameSize?
+  orderItems  OrderItem[]
+  category    Category?   @relation(fields: [categoryId], references: [id])
+  reviews     Review[]
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  customerEmail   String
+  customerName    String
+  status          OrderStatus   @default(PENDING)
+  total           Decimal       @db.Decimal(10, 2)
+  shippingAddress String
+  city            String
+  country         String
+  postalCode      String
+  latitude        Float?
+  longitude       Float?
+  mapAddress      String?
+  paymentIntentId String?
+  paymentStatus   PaymentStatus @default(PENDING)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  mapZoom         Int?          @default(13)
+  orderItems      OrderItem[]
+}
+
+model OrderItem {
+  id            String     @id @default(cuid())
+  quantity      Int
+  price         Decimal    @db.Decimal(10, 2)
+  frameType     FrameType
+  engravingText String?
+  orderId       String
+  productId     String
+  mapZoom       Int?       @default(13)
+  frameSize     FrameSize?
+  order         Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product       Product    @relation(fields: [productId], references: [id])
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  image     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+}
+
+model Review {
+  id           String   @id @default(cuid())
+  rating       Int      @db.SmallInt
+  comment      String
+  customerName String
+  createdAt    DateTime @default(now())
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Cart {
+  id        String     @id @default(cuid())
+  cartId    String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  cartItems CartItem[]
+}
+
+model CartItem {
+  id            String     @id @default(cuid())
+  quantity      Int
+  frameType     FrameType
+  engravingText String?
+  latitude      Float?
+  longitude     Float?
+  mapAddress    String?
+  cartId        String
+  productId     String
+  mapZoom       Int?       @default(13)
+  frameSize     FrameSize?
+  cart          Cart       @relation(fields: [cartId], references: [id], onDelete: Cascade)
+}
+
 enum Role {
   ADMIN
   SUPERADMIN
-}
-
-// Product model
-model Product {
-  id          String    @id @default(cuid())
-  name        String
-  slug        String    @unique
-  description String    @db.Text
-  price       Decimal   @db.Decimal(10, 2)
-  images      String[]  // Array of image URLs
-  stock       Int       @default(0)
-  frameTypes  FrameType @default(PINE)
-  frameSizes  FrameSize @default(SMALL)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  // Relationships
-  category   Category? @relation(fields: [categoryId], references: [id])
-  categoryId String?
-  reviews    Review[]
-  orderItems OrderItem[]
 }
 
 enum FrameType {
@@ -56,55 +124,17 @@ enum FrameType {
 }
 
 enum FrameSize {
-  SMALL  // 8x8
-  LARGE  // 10x10
-}
-
-// Order model
-model Order {
-  id            String      @id @default(cuid())
-  customerEmail String
-  customerName  String
-  status        OrderStatus @default(PENDING)
-  total         Decimal     @db.Decimal(10, 2)
-  
-  // Address information
-  shippingAddress String
-  city            String
-  country         String
-  postalCode      String
-  
-  // Map information
-  latitude        Float?
-  longitude       Float?
-  mapAddress      String?
-  mapZoom         Int?       @default(13)
-  
-  // Payment information
-  paymentIntentId String?
-  paymentStatus   PaymentStatus @default(PENDING)
-  
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  
-  // Relationships
-  orderItems      OrderItem[]
-}
-
-model OrderItem {
-  id         String   @id @default(cuid())
-  quantity   Int
-  price      Decimal  @db.Decimal(10, 2)
-  frameSize  FrameSize
-  frameType  FrameType
-  engravingText String?
-  mapZoom    Int?     @default(13)
-  
-  // Relationships
-  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  orderId    String
-  product    Product  @relation(fields: [productId], references: [id])
-  productId  String
+  SMALL
+  LARGE
+  SIZE_6X6
+  SIZE_8_5X8_5
+  SIZE_8_5X12
+  SIZE_12X12
+  SIZE_12X16
+  SIZE_16X16
+  SIZE_16X20
+  SIZE_20X20
+  SIZE_20X28
 }
 
 enum OrderStatus {
@@ -120,60 +150,4 @@ enum PaymentStatus {
   PAID
   FAILED
   REFUNDED
-}
-
-// Category model
-model Category {
-  id        String    @id @default(cuid())
-  name      String
-  slug      String    @unique
-  image     String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  
-  // Relationships
-  products  Product[]
-}
-
-// Review model
-model Review {
-  id           String   @id @default(cuid())
-  rating       Int      @db.SmallInt // 1-5 star rating
-  comment      String   @db.Text
-  customerName String
-  createdAt    DateTime @default(now())
-  
-  // Relationships
-  product    Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  productId  String
-}
-
-// Cart model
-model Cart {
-  id        String   @id @default(cuid())
-  cartId    String   @unique // Cookie-based identifier
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  // Relationships
-  cartItems CartItem[]
-}
-
-model CartItem {
-  id          String   @id @default(cuid())
-  quantity    Int
-  frameSize   FrameSize
-  frameType   FrameType
-  engravingText String?
-  
-  // Map data
-  latitude   Float?
-  longitude  Float?
-  mapAddress String?
-  mapZoom    Int?     @default(13)
-  
-  // Relationships
-  cart       Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  cartId     String
-  productId  String
 }

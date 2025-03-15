@@ -2,10 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Product } from '@prisma/client';
-import { MapPin, Map, PenLine } from 'lucide-react';
+import { Product, FrameSize, FrameType } from '@prisma/client';
+import { MapPin, Map, PenLine, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,9 +15,41 @@ import {
   TabsList, 
   TabsTrigger 
 } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { useCartStore } from '@/lib/store/cart-store';
 import InteractiveMap from './InteractiveMap';
+
+// Frame size mapping to human-readable labels
+const frameSizeLabels: Record<string, string> = {
+  'SIZE_6X6': '6" × 6"',
+  'SIZE_8_5X8_5': '8.5" × 8.5"',
+  'SIZE_8_5X12': '8.5" × 12"',
+  'SIZE_12X12': '12" × 12"',
+  'SIZE_12X16': '12" × 16"',
+  'SIZE_16X16': '16" × 16"',
+  'SIZE_16X20': '16" × 20"',
+  'SIZE_20X20': '20" × 20"',
+  'SIZE_20X28': '20" × 28"',
+  // Keep legacy mappings for backward compatibility
+  'SMALL': '8.5" × 8.5"',
+  'LARGE': '12" × 12"',
+};
+
+// Frame type mapping to human-readable labels
+const frameTypeLabels: Record<string, string> = {
+  'PINE': 'Pine Wood',
+  'DARK': 'Dark Wood',
+};
+
+// All available frame types
+const allFrameTypes = ['PINE', 'DARK'];
 
 interface ProductOptionsProps {
   product: {
@@ -62,13 +93,16 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
     ? product.frameSizes 
     : [product.frameSizes];
   
-  const frameTypes = Array.isArray(product.frameTypes)
-    ? product.frameTypes
-    : [product.frameTypes];
+  // We'll replace this with our hardcoded array
+  // const frameTypes = Array.isArray(product.frameTypes)
+  //   ? product.frameTypes
+  //   : [product.frameTypes];
   
   // Form state
   const [frameSize, setFrameSize] = useState<string>(frameSizes[0]);
-  const [frameType, setFrameType] = useState<string>(frameTypes[0]);
+  const [frameType, setFrameType] = useState<string>(
+    Array.isArray(product.frameTypes) ? product.frameTypes[0] : product.frameTypes
+  );
   const [locationType, setLocationType] = useState<'address' | 'coordinates'>('address');
   const [address, setAddress] = useState<string>('');
   const [latitude, setLatitude] = useState<string>('');
@@ -143,58 +177,59 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
     setQuantity(value);
   };
   
+  // Get all available frame sizes for the dropdown
+  const allFrameSizes = [
+    'SIZE_6X6',
+    'SIZE_8_5X8_5',
+    'SIZE_8_5X12',
+    'SIZE_12X12',
+    'SIZE_12X16',
+    'SIZE_16X16',
+    'SIZE_16X20',
+    'SIZE_20X20',
+    'SIZE_20X28'
+  ];
+  
   return (
     <div className="space-y-6">
       {/* Frame Size Selection */}
       <div>
         <h3 className="text-sm font-medium text-[#253946] mb-2">Frame Size</h3>
-        <RadioGroup 
+        <Select 
           value={frameSize} 
-          onValueChange={setFrameSize} 
-          className="flex flex-wrap gap-4"
+          onValueChange={setFrameSize}
         >
-          {frameSizes.map((size: string) => (
-            <div key={size} className="flex items-start">
-              <RadioGroupItem 
-                value={size} 
-                id={`size-${size}`} 
-                className="peer sr-only" 
-              />
-              <Label
-                htmlFor={`size-${size}`}
-                className="flex items-center justify-center px-4 py-2 border border-[#95A7B5] rounded-md text-[#253946] cursor-pointer peer-data-[state=checked]:bg-[#A76825] peer-data-[state=checked]:text-white peer-data-[state=checked]:border-[#A76825] hover:bg-[#D2BDA2]/10"
-              >
-                {size === '8x8' ? '8" x 8"' : '10" x 10"'}
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select a frame size" />
+          </SelectTrigger>
+          <SelectContent>
+            {allFrameSizes.map((size) => (
+              <SelectItem key={size} value={size}>
+                {frameSizeLabels[size]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       
       {/* Frame Type Selection */}
       <div>
         <h3 className="text-sm font-medium text-[#253946] mb-2">Frame Style</h3>
-        <RadioGroup 
+        <Select 
           value={frameType} 
-          onValueChange={setFrameType} 
-          className="flex flex-wrap gap-4"
+          onValueChange={setFrameType}
         >
-          {frameTypes.map((type: string) => (
-            <div key={type} className="flex items-start">
-              <RadioGroupItem 
-                value={type} 
-                id={`type-${type}`} 
-                className="peer sr-only" 
-              />
-              <Label
-                htmlFor={`type-${type}`}
-                className="flex items-center justify-center px-4 py-2 border border-[#95A7B5] rounded-md text-[#253946] cursor-pointer peer-data-[state=checked]:bg-[#A76825] peer-data-[state=checked]:text-white peer-data-[state=checked]:border-[#A76825] hover:bg-[#D2BDA2]/10"
-              >
-                {type === 'pine' ? 'Pine Wood' : 'Dark Wood'}
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select a frame style" />
+          </SelectTrigger>
+          <SelectContent>
+            {allFrameTypes.map((type) => (
+              <SelectItem key={type} value={type}>
+                {frameTypeLabels[type]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       
       {/* Location Input */}
