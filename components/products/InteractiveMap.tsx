@@ -13,8 +13,13 @@ const customMapStyle = [
   { featureType: "water", elementType: "geometry", stylers: [{ visibility: "on" }] },
 ];
 
-// Google Maps API Key
-const GOOGLE_MAPS_API_KEY = "AIzaSyAW32t7ehF5SbBEr3UM-x2wPSnZKsZWXQQ";
+// Google Maps API Key from environment variables
+const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
+
+// Show a warning if the API key is missing
+if (!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) {
+  console.warn('Google Maps API key is missing. Map functionality will be limited.');
+}
 
 // Type definitions for Google Maps
 declare global {
@@ -68,6 +73,13 @@ export default function InteractiveMap({
     // Check if Google Maps is already loaded
     if (window.google && window.google.maps) {
       setIsLoaded(true);
+      setIsLoading(false);
+      return;
+    }
+
+    // Check if API key is missing
+    if (!GOOGLE_MAPS_API_KEY) {
+      setLoadError('Google Maps API key is missing. Please check your environment configuration.');
       setIsLoading(false);
       return;
     }
