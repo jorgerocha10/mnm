@@ -28,6 +28,14 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
     notFound();
   }
 
+  // Serialize the product data to handle Decimal fields
+  const serializedProduct = {
+    ...product,
+    price: product.price.toString(),
+    createdAt: product.createdAt.toISOString(),
+    updatedAt: product.updatedAt.toISOString(),
+  };
+
   // Fetch categories for the form
   const categories = await prisma.category.findMany({
     orderBy: {
@@ -46,7 +54,7 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
 
       <div className="bg-white rounded-md p-6 shadow">
         <ProductForm 
-          initialData={product} 
+          initialData={serializedProduct} 
           categories={categories} 
         />
       </div>
