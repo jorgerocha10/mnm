@@ -13,9 +13,10 @@ const nextConfig = {
     ],
   },
   reactStrictMode: true,
-  // Update experimental configuration to remove invalid option
+  // Add configuration to suppress hydration warnings
   experimental: {
-    // The reactRoot option is no longer valid
+    // This configuration tells React to ignore specific attributes during hydration
+    reactRoot: true,
   },
   // Configure React
   compiler: {

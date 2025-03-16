@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ShoppingCart, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { useCartStore } from "@/lib/store/cart-store";
 
 const MainNav = () => (
@@ -32,22 +32,22 @@ const MainNav = () => (
 );
 
 const MobileNav = () => (
-  <nav className="flex flex-col space-y-6 pt-10">
+  <nav className="flex flex-col space-y-8 pt-6">
     <Link 
       href="/" 
-      className="text-[#253946] hover:text-[#95A7B5] text-2xl transition-colors"
+      className="text-[#253946] hover:text-[#95A7B5] text-2xl font-medium transition-colors"
     >
       Home
     </Link>
     <Link 
       href="/products" 
-      className="text-[#253946] hover:text-[#95A7B5] text-2xl transition-colors"
+      className="text-[#253946] hover:text-[#95A7B5] text-2xl font-medium transition-colors"
     >
       Shop
     </Link>
     <Link 
       href="/about" 
-      className="text-[#253946] hover:text-[#95A7B5] text-2xl transition-colors"
+      className="text-[#253946] hover:text-[#95A7B5] text-2xl font-medium transition-colors"
     >
       About
     </Link>
@@ -113,14 +113,8 @@ export default function Header() {
                   <Menu className="h-6 w-6 text-[#253946]" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="bg-[#F7F5F6] w-[300px]">
-                <div className="flex justify-end">
-                  <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <X className="h-6 w-6 text-[#253946]" />
-                    </Button>
-                  </SheetTrigger>
-                </div>
+              <SheetContent side="right" className="bg-[#F7F5F6] w-[300px] p-6">
+                <SheetTitle className="text-[#253946]">Navigation</SheetTitle>
                 <MobileNav />
               </SheetContent>
             </Sheet>

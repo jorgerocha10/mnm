@@ -48,21 +48,6 @@ export default function Footer() {
                   All Products
                 </Link>
               </li>
-              <li>
-                <Link href="/products/category/city-maps" className="text-[#95A7B5] hover:text-white transition-colors">
-                  City Maps
-                </Link>
-              </li>
-              <li>
-                <Link href="/products/category/nature-locations" className="text-[#95A7B5] hover:text-white transition-colors">
-                  Nature Locations
-                </Link>
-              </li>
-              <li>
-                <Link href="/products/category/special-moments" className="text-[#95A7B5] hover:text-white transition-colors">
-                  Special Moments
-                </Link>
-              </li>
             </ul>
           </div>
 
@@ -73,11 +58,6 @@ export default function Footer() {
               <li>
                 <Link href="/about" className="text-[#95A7B5] hover:text-white transition-colors">
                   About Us
-                </Link>
-              </li>
-              <li>
-                <Link href="/how-it-works" className="text-[#95A7B5] hover:text-white transition-colors">
-                  How It Works
                 </Link>
               </li>
               <li>
