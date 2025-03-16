@@ -43,6 +43,7 @@ interface InteractiveMapProps {
     coordinates: { lat: number; lng: number };
     zoom: number;
   }) => void;
+  category?: string;
 }
 
 export default function InteractiveMap({
@@ -54,6 +55,7 @@ export default function InteractiveMap({
   orientation = 'horizontal',
   onOrientationChange,
   onLocationSelect,
+  category,
 }: InteractiveMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -73,6 +75,17 @@ export default function InteractiveMap({
     coordinates: initialCoordinates || { lat: 40.7128, lng: -74.0060 }, // Default to NYC
     zoom: 13,
   });
+
+  // For debugging
+  useEffect(() => {
+    console.log('Map component props:', {
+      frameType,
+      frameSize,
+      category,
+      orientation,
+      showRotate
+    });
+  }, [frameType, frameSize, category, orientation, showRotate]);
 
   // Load Google Maps API
   useEffect(() => {
@@ -436,8 +449,9 @@ export default function InteractiveMap({
             <Button
               type="button"
               variant="outline"
-              className="ml-2 border-[#95A7B5] text-[#253946] hover:bg-[#95A7B5]/10"
+              className="ml-2 border-[#95A7B5] text-[#253946] hover:bg-[#95A7B5]/10 flex items-center gap-1"
               onClick={() => onOrientationChange?.(orientation === 'horizontal' ? 'vertical' : 'horizontal')}
+              title="Change orientation between horizontal and vertical"
             >
               <svg
                 className={`w-4 h-4 transition-transform ${orientation === 'vertical' ? 'rotate-90' : ''}`}
@@ -454,6 +468,7 @@ export default function InteractiveMap({
                 <path d="M12 17v4" />
                 <path d="M3 11h18" />
               </svg>
+              <span>Rotate {orientation === 'horizontal' ? '' : ''}</span>
             </Button>
           )}
         </form>
@@ -472,7 +487,14 @@ export default function InteractiveMap({
           ref={mapRef} 
           className={`${getFrameDimensions()} relative rounded-sm overflow-hidden shadow-lg flex items-center justify-center bg-gray-100`}
           style={{
-            border: `20px solid ${frameType === 'PINE' ? '#D2BDA2' : '#3E2723'}`,
+            ...((category === 'Key holders' || frameSize === 'SIZE_4_5X8_5' || frameSize === 'SIZE_6X12')
+              ? {
+                  borderBottom: `50px solid ${frameType === 'PINE' ? '#D2BDA2' : '#3E2723'}`,
+                }
+              : {
+                  border: `20px solid ${frameType === 'PINE' ? '#D2BDA2' : '#3E2723'}`,
+                }
+            ),
             backgroundImage: frameType === 'PINE' 
               ? 'linear-gradient(45deg, rgba(210, 189, 162, 0.8) 25%, rgba(200, 175, 145, 0.8) 25%, rgba(200, 175, 145, 0.8) 50%, rgba(210, 189, 162, 0.8) 50%, rgba(210, 189, 162, 0.8) 75%, rgba(200, 175, 145, 0.8) 75%, rgba(200, 175, 145, 0.8) 100%)'
               : 'linear-gradient(45deg, rgba(62, 39, 35, 0.8) 25%, rgba(51, 32, 29, 0.8) 25%, rgba(51, 32, 29, 0.8) 50%, rgba(62, 39, 35, 0.8) 50%, rgba(62, 39, 35, 0.8) 75%, rgba(51, 32, 29, 0.8) 75%, rgba(51, 32, 29, 0.8) 100%)',

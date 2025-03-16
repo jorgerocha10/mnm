@@ -290,17 +290,17 @@ Buttons & Links
     - [x] Multi-image upload with Uploadthing
     - [x] Image reordering
     - [x] Image cropping and optimization
-- [ ] Order management:
-  - [ ] Create orders listing page (`/admin/orders`):
-    - [ ] Filterable by date, status, customer
-    - [ ] Quick status update actions
-    - [ ] Export functionality
-  - [ ] Build order detail view (`/admin/orders/[id]`):
-    - [ ] Customer information
-    - [ ] Order items with options
-    - [ ] Status update workflow
-    - [ ] Payment details
-    - [ ] Shipping information
+- [x] Order management:
+  - [x] Create orders listing page (`/admin/orders`):
+    - [x] Filterable by date, status, customer
+    - [x] Quick status update actions
+    - [x] Export functionality
+  - [x] Build order detail view (`/admin/orders/[id]`):
+    - [x] Customer information
+    - [x] Order items with options
+    - [x] Status update workflow
+    - [x] Payment details
+    - [x] Shipping information
 
 ### 5. Advanced Features [ ]
 

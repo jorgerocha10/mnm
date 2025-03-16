@@ -39,12 +39,12 @@ const navItems = [
   },
   {
     label: 'Customers',
-    href: '/admin/customers',
+    href: '#',
     icon: Users,
   },
   {
     label: 'Settings',
-    href: '/admin/settings',
+    href: '#1',
     icon: Settings,
   },
 ];

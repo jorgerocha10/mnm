@@ -42,7 +42,7 @@ export function AdminHeader() {
   
   // Navigation items
   const navItems = [
-    { href: '/admin', label: 'Dashboard', icon: Home },
+    { href: '/admin/dashboard', label: 'Dashboard', icon: Home },
     { href: '/admin/products', label: 'Products', icon: Package2 },
     { href: '/admin/orders', label: 'Orders', icon: ShoppingCart },
     { href: '/admin/categories', label: 'Categories', icon: Settings },
