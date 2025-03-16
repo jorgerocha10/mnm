@@ -3,7 +3,7 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { MapPin, Map, Pen, Package } from "lucide-react";
+import { Product } from "@prisma/client";
 
 // Fetch featured products
 async function getFeaturedProducts() {
@@ -14,15 +14,15 @@ async function getFeaturedProducts() {
         category: true,
       },
     });
-    
+
     // Convert Decimal values to strings to avoid serialization issues
-    const serializedProducts = products.map(product => ({
+    const serializedProducts = products.map((product: any) => ({
       ...product,
       price: product.price.toString(),
       createdAt: product.createdAt.toISOString(),
       updatedAt: product.updatedAt.toISOString(),
     }));
-    
+
     return serializedProducts;
   } catch (error) {
     console.error("Error fetching featured products:", error);
@@ -32,7 +32,7 @@ async function getFeaturedProducts() {
 
 export default async function HomePage() {
   const featuredProducts = await getFeaturedProducts();
-  
+
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
@@ -43,11 +43,11 @@ export default async function HomePage() {
               Turn Your Special Places into Lasting Memories
             </h1>
             <p className="text-lg text-[#253946] md:pr-12">
-              Custom map frames featuring the locations that matter most to you. 
+              Custom map frames featuring the locations that matter most to you.
               The perfect gift for weddings, anniversaries, new homes, or any special occasion.
             </p>
             <div className="pt-4">
-              <Button 
+              <Button
                 asChild
                 className="bg-[#A76825] hover:bg-[#8a561e] text-white px-8 py-6 text-lg rounded-md"
               >
@@ -78,9 +78,9 @@ export default async function HomePage() {
               Our most popular map frames, chosen by customers like you.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredProducts.map((product) => (
+            {featuredProducts.map((product: any) => (
               <Link key={product.id} href={`/products/${product.slug}`} className="group">
                 <Card className="overflow-hidden transition-all hover:shadow-md">
                   <div className="relative h-64 w-full overflow-hidden">
@@ -109,9 +109,9 @@ export default async function HomePage() {
               </Link>
             ))}
           </div>
-          
+
           <div className="text-center mt-12">
-            <Button 
+            <Button
               asChild
               variant="outline"
               className="border-[#95A7B5] text-[#253946] hover:bg-[#95A7B5]/10"
@@ -133,41 +133,65 @@ export default async function HomePage() {
               Creating your personalized map frame is simple.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="flex flex-col items-center text-center">
-              <div className="bg-[#D2BDA2]/30 p-4 rounded-full mb-6">
-                <MapPin className="h-10 w-10 text-[#A76825]" />
+              <div className="bg-[#D2BDA2]/30 rounded-full mb-6 flex items-center justify-center h-20 w-20 overflow-hidden">
+                <Image
+                  src="/images/MapPin.png"
+                  alt="Choose Location"
+                  width={80}
+                  height={80}
+                  className="object-contain"
+                />
               </div>
               <h3 className="text-xl font-semibold text-[#253946] mb-2">Choose Location</h3>
               <p className="text-[#253946]">
                 Select a special place by entering an address or exact coordinates.
               </p>
             </div>
-            
+
             <div className="flex flex-col items-center text-center">
-              <div className="bg-[#D2BDA2]/30 p-4 rounded-full mb-6">
-                <Map className="h-10 w-10 text-[#A76825]" />
+              <div className="bg-[#D2BDA2]/30 rounded-full mb-6 flex items-center justify-center h-20 w-20 overflow-hidden">
+                <Image
+                  src="/images/map.png"
+                  alt="Pick Your Style"
+                  width={80}
+                  height={80}
+                  className="object-contain"
+                />
               </div>
               <h3 className="text-xl font-semibold text-[#253946] mb-2">Pick Your Style</h3>
               <p className="text-[#253946]">
                 Choose a frame size and style that matches your decor.
               </p>
             </div>
-            
+
             <div className="flex flex-col items-center text-center">
-              <div className="bg-[#D2BDA2]/30 p-4 rounded-full mb-6">
-                <Pen className="h-10 w-10 text-[#A76825]" />
+              <div className="bg-[#D2BDA2]/30 rounded-full mb-6 flex items-center justify-center h-20 w-20 overflow-hidden">
+                <Image
+                  src="/images/pen.png"
+                  alt="Add Personal Touch"
+                  width={80}
+                  height={80}
+                  className="object-contain"
+                />
               </div>
               <h3 className="text-xl font-semibold text-[#253946] mb-2">Add Personal Touch</h3>
               <p className="text-[#253946]">
                 Include a custom engraving to commemorate the occasion.
               </p>
             </div>
-            
+
             <div className="flex flex-col items-center text-center">
-              <div className="bg-[#D2BDA2]/30 p-4 rounded-full mb-6">
-                <Package className="h-10 w-10 text-[#A76825]" />
+              <div className="bg-[#D2BDA2]/30 rounded-full mb-6 flex items-center justify-center h-20 w-20 overflow-hidden">
+                <Image
+                  src="/images/package.png"
+                  alt="We Ship to You"
+                  width={80}
+                  height={80}
+                  className="object-contain"
+                />
               </div>
               <h3 className="text-xl font-semibold text-[#253946] mb-2">We Ship to You</h3>
               <p className="text-[#253946]">
@@ -175,14 +199,14 @@ export default async function HomePage() {
               </p>
             </div>
           </div>
-          
+
           <div className="text-center mt-16">
-            <Button 
+            <Button
               asChild
               className="bg-[#A76825] hover:bg-[#8a561e] text-white"
             >
-              <Link href="/how-it-works">
-                Learn More
+              <Link href="/products">
+                Shop Now
               </Link>
             </Button>
           </div>

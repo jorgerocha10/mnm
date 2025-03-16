@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ShoppingCart, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -20,12 +21,6 @@ const MainNav = () => (
       className="text-[#253946] hover:text-[#95A7B5] transition-colors"
     >
       Shop
-    </Link>
-    <Link 
-      href="/how-it-works" 
-      className="text-[#253946] hover:text-[#95A7B5] transition-colors"
-    >
-      How It Works
     </Link>
     <Link 
       href="/about" 
@@ -49,12 +44,6 @@ const MobileNav = () => (
       className="text-[#253946] hover:text-[#95A7B5] text-2xl transition-colors"
     >
       Shop
-    </Link>
-    <Link 
-      href="/how-it-works" 
-      className="text-[#253946] hover:text-[#95A7B5] text-2xl transition-colors"
-    >
-      How It Works
     </Link>
     <Link 
       href="/about" 
@@ -89,7 +78,14 @@ export default function Header() {
       <div className="container mx-auto flex items-center justify-between h-20 px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center">
-          <span className="text-2xl font-bold text-[#253946]">Maps & Memories</span>
+          <Image 
+            src="/images/Logo_4.png" 
+            alt="Maps & Memories Logo" 
+            width={180} 
+            height={50} 
+            className="h-auto"
+            priority
+          />
         </Link>
 
         {/* Desktop Navigation */}
