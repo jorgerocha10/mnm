@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Product } from "@prisma/client";
+import { getLowestPriceByCategory, formatPrice } from "@/lib/services/pricing";
 
 // Fetch featured products
 async function getFeaturedProducts() {
@@ -98,7 +99,7 @@ export default async function HomePage() {
                     </h3>
                     <div className="flex justify-between items-center">
                       <span className="text-[#253946] font-medium">
-                        ${product.price}
+                        {formatPrice(getLowestPriceByCategory(product.category?.name))}
                       </span>
                       <span className="text-[#95A7B5] text-sm">
                         {product.category?.name}

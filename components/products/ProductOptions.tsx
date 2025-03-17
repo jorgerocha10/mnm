@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Product, FrameSize, FrameType } from '@prisma/client';
 import { MapPin, Map, PenLine, ChevronDown } from 'lucide-react';
@@ -25,17 +25,33 @@ import {
 import { toast } from "sonner";
 import { useCartStore } from '@/lib/store/cart-store';
 import InteractiveMap from './InteractiveMap';
-import { frameSizeLabels } from '@/lib/constants';
-import { getFrameSizePrice, formatPrice } from '@/lib/services/pricing';
 
-// All available frame types
-const allFrameTypes = ['PINE', 'DARK'];
+// Frame size mapping to human-readable labels
+const frameSizeLabels: Record<string, string> = {
+  'SIZE_6X6': '6" × 6"',
+  'SIZE_8_5X8_5': '8.5" × 8.5"',
+  'SIZE_8_5X12': '8.5" × 12"',
+  'SIZE_12X12': '12" × 12"',
+  'SIZE_12X16': '12" × 16"',
+  'SIZE_16X16': '16" × 16"',
+  'SIZE_16X20': '16" × 20"',
+  'SIZE_20X20': '20" × 20"',
+  'SIZE_20X28': '20" × 28"',
+  'SIZE_4_5X8_5': '4.5" × 8.5"',
+  'SIZE_6X12': '6" × 12"',
+  // Keep legacy mappings for backward compatibility
+  'SMALL': '8.5" × 8.5"',
+  'LARGE': '12" × 12"',
+};
 
 // Frame type mapping to human-readable labels
 const frameTypeLabels: Record<string, string> = {
   'PINE': 'Pine Wood',
   'DARK': 'Dark Wood',
 };
+
+// All available frame types
+const allFrameTypes = ['PINE', 'DARK'];
 
 // Get all available frame sizes for the dropdown
 const allFrameSizes = [
@@ -48,12 +64,6 @@ const allFrameSizes = [
   'SIZE_16X20',
   'SIZE_20X20',
   'SIZE_20X28'
-];
-
-// Key holder sizes
-const keyHolderSizes = [
-  'SIZE_4_5X8_5',
-  'SIZE_6X12'
 ];
 
 interface ProductOptionsProps {
@@ -96,7 +106,7 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
   // Get available frame sizes based on category
   const getAvailableFrameSizes = () => {
     if (product.category?.name === 'Key holders') {
-      return keyHolderSizes;
+      return ['SIZE_4_5X8_5', 'SIZE_6X12'];
     }
     return allFrameSizes;
   };
@@ -107,9 +117,6 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
   const [frameType, setFrameType] = useState<string>(
     Array.isArray(product.frameTypes) ? product.frameTypes[0] : product.frameTypes
   );
-  const [currentPrice, setCurrentPrice] = useState<number>(
-    getFrameSizePrice(frameSize, product.category?.name)
-  );
   const [locationType, setLocationType] = useState<'address' | 'coordinates'>('address');
   const [address, setAddress] = useState<string>('');
   const [latitude, setLatitude] = useState<string>('');
@@ -118,11 +125,6 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
   const [quantity, setQuantity] = useState(1);
   const [mapZoom, setMapZoom] = useState(13);
   const [mapOrientation, setMapOrientation] = useState<'horizontal' | 'vertical'>('horizontal');
-  
-  // Update price when frame size changes
-  useEffect(() => {
-    setCurrentPrice(getFrameSizePrice(frameSize, product.category?.name));
-  }, [frameSize, product.category?.name]);
   
   // Check if product is in Multi layers or Bas relief category
   const allowRotation = product.category?.name === 'Multi layers' || product.category?.name === 'Bas Relief';
@@ -157,12 +159,6 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
     setMapOrientation(newOrientation);
   };
   
-  // Handle frame size change
-  const handleFrameSizeChange = (newSize: string) => {
-    setFrameSize(newSize);
-    // Price will be updated in the useEffect
-  };
-  
   // Handle add to cart
   const handleAddToCart = () => {
     // Validate location
@@ -180,7 +176,7 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
     const cartItem = {
       productId: product.id,
       name: product.name,
-      price: currentPrice, // Use frame size specific price
+      price: Number(product.price),
       image: product.images[0] || '',
       quantity,
       options: {
@@ -216,17 +212,12 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
   
   return (
     <div className="space-y-6">
-      {/* Price Display */}
-      <div className="text-2xl font-bold text-[#253946]">
-        {formatPrice(currentPrice)}
-      </div>
-      
       {/* Frame Size Selection */}
       <div>
         <h3 className="text-sm font-medium text-[#253946] mb-2">Frame Size</h3>
         <Select 
           value={frameSize} 
-          onValueChange={handleFrameSizeChange}
+          onValueChange={setFrameSize}
         >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select a frame size" />
@@ -234,7 +225,7 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
           <SelectContent>
             {availableFrameSizes.map((size) => (
               <SelectItem key={size} value={size}>
-                {frameSizeLabels[size]} ({formatPrice(getFrameSizePrice(size, product.category?.name))})
+                {frameSizeLabels[size]}
               </SelectItem>
             ))}
           </SelectContent>

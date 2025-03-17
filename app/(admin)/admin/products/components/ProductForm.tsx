@@ -168,13 +168,10 @@ export function ProductForm({ initialData, categories }: ProductFormProps) {
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Base Price ($) - Fallback Only</FormLabel>
+                    <FormLabel>Price ($)</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.01" min="0" {...field} />
                     </FormControl>
-                    <p className="text-xs text-muted-foreground">
-                      This is only a fallback price. All prices are determined by frame size from the Frame Prices page.
-                    </p>
                     <FormMessage />
                   </FormItem>
                 )}

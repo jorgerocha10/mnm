@@ -38,11 +38,6 @@ const navItems = [
     icon: Tag,
   },
   {
-    label: 'Frame Prices',
-    href: '/admin/frame-prices',
-    icon: Tag,
-  },
-  {
     label: 'Customers',
     href: '#',
     icon: Users,

@@ -13,6 +13,12 @@ export const frameSizeLabels: Record<string, string> = {
   SIZE_16X20: '16" x 20"',
   SIZE_20X20: '20" x 20"',
   SIZE_20X28: '20" x 28"',
+  SIZE_28X28: '28" x 28"',
+  SIZE_28X35: '28" x 35"',
+  SIZE_35X35: '35" x 35"',
+  // Legacy sizes
+  SMALL: '8.5" x 8.5"',
+  LARGE: '12" x 12"',
 };
 
 /**
