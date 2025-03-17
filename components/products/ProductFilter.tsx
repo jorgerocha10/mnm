@@ -6,7 +6,6 @@ import { Category } from '@prisma/client';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Accordion,
@@ -24,23 +23,11 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 
-const FRAME_TYPES = [
-  { value: 'pine', label: 'Pine Wood' },
-  { value: 'dark', label: 'Dark Wood' },
-];
-
-const FRAME_SIZES = [
-  { value: '8x8', label: '8" x 8"' },
-  { value: '10x10', label: '10" x 10"' },
-];
-
 interface ProductFilterProps {
   categories: Category[];
   selectedCategory?: string;
   minPrice?: string;
   maxPrice?: string;
-  selectedFrameType?: string;
-  selectedFrameSize?: string;
 }
 
 export default function ProductFilter({
@@ -48,8 +35,6 @@ export default function ProductFilter({
   selectedCategory,
   minPrice,
   maxPrice,
-  selectedFrameType,
-  selectedFrameSize,
 }: ProductFilterProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -95,32 +80,6 @@ export default function ProductFilter({
     applyFilters(params);
   };
   
-  // Handle frame type change
-  const handleFrameTypeChange = (value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    
-    if (value === selectedFrameType) {
-      params.delete('frameType');
-    } else {
-      params.set('frameType', value);
-    }
-    
-    applyFilters(params);
-  };
-  
-  // Handle frame size change
-  const handleFrameSizeChange = (value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    
-    if (value === selectedFrameSize) {
-      params.delete('frameSize');
-    } else {
-      params.set('frameSize', value);
-    }
-    
-    applyFilters(params);
-  };
-  
   // Clear all filters
   const clearAllFilters = () => {
     const params = new URLSearchParams(searchParams.toString());
@@ -128,8 +87,6 @@ export default function ProductFilter({
     params.delete('category');
     params.delete('minPrice');
     params.delete('maxPrice');
-    params.delete('frameType');
-    params.delete('frameSize');
     params.delete('page');
     
     // Keep search query if exists
@@ -157,9 +114,7 @@ export default function ProductFilter({
   const hasActiveFilters = Boolean(
     selectedCategory || 
     minPrice || 
-    maxPrice || 
-    selectedFrameType || 
-    selectedFrameSize
+    maxPrice
   );
   
   // Desktop filter component
@@ -232,70 +187,6 @@ export default function ProductFilter({
                 <span className="text-[#253946]">${priceRange[1]}</span>
               </div>
             </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-      
-      <Separator />
-      
-      {/* Frame Type */}
-      <Accordion type="single" collapsible defaultValue="frameType">
-        <AccordionItem value="frameType" className="border-none">
-          <AccordionTrigger className="py-2 text-[#253946]">Frame Type</AccordionTrigger>
-          <AccordionContent>
-            <RadioGroup
-              value={selectedFrameType}
-              onValueChange={handleFrameTypeChange}
-              className="space-y-2"
-            >
-              {FRAME_TYPES.map((type) => (
-                <div key={type.value} className="flex items-center">
-                  <RadioGroupItem
-                    value={type.value}
-                    id={`frame-type-${type.value}`}
-                    className="text-[#A76825]"
-                  />
-                  <Label
-                    htmlFor={`frame-type-${type.value}`}
-                    className="ml-2 text-[#253946] cursor-pointer"
-                  >
-                    {type.label}
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-      
-      <Separator />
-      
-      {/* Frame Size */}
-      <Accordion type="single" collapsible defaultValue="frameSize">
-        <AccordionItem value="frameSize" className="border-none">
-          <AccordionTrigger className="py-2 text-[#253946]">Frame Size</AccordionTrigger>
-          <AccordionContent>
-            <RadioGroup
-              value={selectedFrameSize}
-              onValueChange={handleFrameSizeChange}
-              className="space-y-2"
-            >
-              {FRAME_SIZES.map((size) => (
-                <div key={size.value} className="flex items-center">
-                  <RadioGroupItem
-                    value={size.value}
-                    id={`frame-size-${size.value}`}
-                    className="text-[#A76825]"
-                  />
-                  <Label
-                    htmlFor={`frame-size-${size.value}`}
-                    className="ml-2 text-[#253946] cursor-pointer"
-                  >
-                    {size.label}
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
           </AccordionContent>
         </AccordionItem>
       </Accordion>

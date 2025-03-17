@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Product, FrameSize, FrameType } from '@prisma/client';
 import { MapPin, Map, PenLine, ChevronDown } from 'lucide-react';
@@ -25,30 +25,8 @@ import {
 import { toast } from "sonner";
 import { useCartStore } from '@/lib/store/cart-store';
 import InteractiveMap from './InteractiveMap';
-
-// Frame size mapping to human-readable labels
-const frameSizeLabels: Record<string, string> = {
-  'SIZE_6X6': '6" × 6"',
-  'SIZE_8_5X8_5': '8.5" × 8.5"',
-  'SIZE_8_5X12': '8.5" × 12"',
-  'SIZE_12X12': '12" × 12"',
-  'SIZE_12X16': '12" × 16"',
-  'SIZE_16X16': '16" × 16"',
-  'SIZE_16X20': '16" × 20"',
-  'SIZE_20X20': '20" × 20"',
-  'SIZE_20X28': '20" × 28"',
-  'SIZE_4_5X8_5': '4.5" × 8.5"',
-  'SIZE_6X12': '6" × 12"',
-  // Keep legacy mappings for backward compatibility
-  'SMALL': '8.5" × 8.5"',
-  'LARGE': '12" × 12"',
-};
-
-// Frame type mapping to human-readable labels
-const frameTypeLabels: Record<string, string> = {
-  'PINE': 'Pine Wood',
-  'DARK': 'Dark Wood',
-};
+import { getFrameSizePrice, formatPrice } from '@/lib/services/pricing';
+import { frameSizeLabels, frameTypeLabels } from '@/lib/constants';
 
 // All available frame types
 const allFrameTypes = ['PINE', 'DARK'];
@@ -117,6 +95,9 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
   const [frameType, setFrameType] = useState<string>(
     Array.isArray(product.frameTypes) ? product.frameTypes[0] : product.frameTypes
   );
+  const [currentPrice, setCurrentPrice] = useState<number>(
+    getFrameSizePrice(availableFrameSizes[0], product.category?.name)
+  );
   const [locationType, setLocationType] = useState<'address' | 'coordinates'>('address');
   const [address, setAddress] = useState<string>('');
   const [latitude, setLatitude] = useState<string>('');
@@ -125,6 +106,11 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
   const [quantity, setQuantity] = useState(1);
   const [mapZoom, setMapZoom] = useState(13);
   const [mapOrientation, setMapOrientation] = useState<'horizontal' | 'vertical'>('horizontal');
+  
+  // Update price when frame size changes
+  useEffect(() => {
+    setCurrentPrice(getFrameSizePrice(frameSize, product.category?.name));
+  }, [frameSize, product.category?.name]);
   
   // Check if product is in Multi layers or Bas relief category
   const allowRotation = product.category?.name === 'Multi layers' || product.category?.name === 'Bas Relief';
@@ -137,6 +123,11 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
     'SIZE_16X16', 
     'SIZE_20X20'
   ].includes(frameSize);
+  
+  // Handle frame size change
+  const handleFrameSizeChange = (size: string) => {
+    setFrameSize(size);
+  };
   
   // Handle location selection from map
   const handleLocationSelect = (location: {
@@ -176,7 +167,7 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
     const cartItem = {
       productId: product.id,
       name: product.name,
-      price: Number(product.price),
+      price: currentPrice,
       image: product.images[0] || '',
       quantity,
       options: {
@@ -212,12 +203,17 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
   
   return (
     <div className="space-y-6">
+      {/* Price Display */}
+      <div className="text-2xl font-semibold text-[#253946]">
+        {formatPrice(currentPrice)}
+      </div>
+      
       {/* Frame Size Selection */}
       <div>
         <h3 className="text-sm font-medium text-[#253946] mb-2">Frame Size</h3>
         <Select 
           value={frameSize} 
-          onValueChange={setFrameSize}
+          onValueChange={handleFrameSizeChange}
         >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select a frame size" />
@@ -225,7 +221,7 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
           <SelectContent>
             {availableFrameSizes.map((size) => (
               <SelectItem key={size} value={size}>
-                {frameSizeLabels[size]}
+                {frameSizeLabels[size]} - {formatPrice(getFrameSizePrice(size, product.category?.name))}
               </SelectItem>
             ))}
           </SelectContent>
