@@ -6,8 +6,6 @@ import ShippingUpdatePreview from './components/ShippingUpdatePreview';
 import PasswordResetPreview from './components/PasswordResetPreview';
 import { Separator } from '@/components/ui/separator';
 import { PageHeader } from '@/components/admin/AdminHeader';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { InfoIcon } from 'lucide-react';
 
 export default async function EmailPreviewPage() {
   const session = await auth();
@@ -22,15 +20,6 @@ export default async function EmailPreviewPage() {
         title="Email Templates Preview" 
         description="Preview and test email templates before sending them to customers"
       />
-
-      <Alert className="bg-[#D2BDA2]/20 border-[#A76825]">
-        <InfoIcon className="h-4 w-4 text-[#A76825]" />
-        <AlertTitle className="text-[#253946] font-medium">Email System Operational</AlertTitle>
-        <AlertDescription className="text-[#253946]">
-          Automatic emails are now enabled for order confirmations and shipping updates. Emails will be sent to customers 
-          when orders are created and when order status changes.
-        </AlertDescription>
-      </Alert>
 
       <div className="bg-white rounded-md p-6 shadow">
         <Tabs defaultValue="order-confirmation" className="w-full">

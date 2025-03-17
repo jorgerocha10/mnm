@@ -8,8 +8,6 @@ async function getProducts(searchParams: {
   category?: string;
   minPrice?: string;
   maxPrice?: string;
-  frameType?: string;
-  frameSize?: string;
   search?: string;
   sort?: string;
   page?: string;
@@ -39,16 +37,6 @@ async function getProducts(searchParams: {
       if (searchParams.maxPrice) {
         where.price.lte = parseFloat(searchParams.maxPrice);
       }
-    }
-    
-    // Frame type filter
-    if (searchParams.frameType) {
-      where.frameTypes = searchParams.frameType;
-    }
-    
-    // Frame size filter
-    if (searchParams.frameSize) {
-      where.frameSizes = searchParams.frameSize;
     }
     
     // Search filter
@@ -96,7 +84,7 @@ async function getProducts(searchParams: {
     });
     
     // Convert Decimal objects to strings
-    const serializedProducts = products.map(product => ({
+    const serializedProducts = products.map((product: any) => ({
       ...product,
       price: product.price.toString(),
       createdAt: product.createdAt.toISOString(),
@@ -144,8 +132,6 @@ interface PageProps {
     category?: string;
     minPrice?: string;
     maxPrice?: string;
-    frameType?: string;
-    frameSize?: string;
     search?: string;
     sort?: string;
     page?: string;
@@ -178,8 +164,6 @@ export default async function ProductsPage({
             selectedCategory={params.category}
             minPrice={params.minPrice}
             maxPrice={params.maxPrice}
-            selectedFrameType={params.frameType}
-            selectedFrameSize={params.frameSize}
           />
         </div>
         

@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { getLowestPriceByCategory, formatPrice } from '@/lib/services/pricing';
 
 interface ProductWithCategory extends Product {
   category: Category | null;
@@ -186,7 +187,7 @@ export default function ProductGrid({
                   </p>
                   <div className="flex justify-between items-center mt-auto">
                     <span className="text-[#253946] font-medium">
-                      ${product.price.toString()}
+                      {formatPrice(getLowestPriceByCategory(product.category?.name))}
                     </span>
                     <span className="text-[#95A7B5] text-sm">
                       {product.category?.name}

@@ -26,15 +26,7 @@ export async function POST(request: Request) {
     }
 
     // Render the email HTML
-    const html = await renderAsync(ShippingUpdateEmail({
-      orderId: shippingData.orderId,
-      customerName: shippingData.customerName,
-      status: shippingData.status,
-      trackingNumber: shippingData.trackingNumber,
-      trackingUrl: shippingData.trackingUrl,
-      estimatedDelivery: shippingData.estimatedDelivery,
-      carrier: shippingData.carrier
-    }));
+    const html = await renderAsync(ShippingUpdateEmail(shippingData));
 
     // Return the HTML
     return new NextResponse(JSON.stringify({ html }), {

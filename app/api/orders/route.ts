@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import Stripe from 'stripe';
 import { OrderStatus, PaymentStatus, FrameSize, FrameType } from '@prisma/client';
-import { sendOrderConfirmationEmail } from '@/lib/email/send-email';
 
 // Flag to indicate if we're in testing/development mode
 const USE_TEST_DATA = process.env.NODE_ENV === 'development';
@@ -200,55 +199,6 @@ export async function POST(req: NextRequest) {
       }
       
       console.log('All order items created successfully');
-      
-      // Send order confirmation email
-      try {
-        // Get complete order with items for the email
-        const orderWithItems = await prisma.order.findUnique({
-          where: { id: order.id },
-          include: {
-            orderItems: {
-              include: {
-                product: true,
-              },
-            },
-          },
-        });
-
-        if (orderWithItems) {
-          // Format the order data for the email template
-          const emailOrderData = {
-            id: orderWithItems.id,
-            customerName: orderWithItems.customerName,
-            customerEmail: orderWithItems.customerEmail,
-            orderDate: orderWithItems.createdAt,
-            total: orderWithItems.total.toString(),
-            items: orderWithItems.orderItems.map((item: any) => ({
-              productId: item.productId,
-              name: item.product.name,
-              price: item.price.toString(),
-              image: item.product.images[0] || 'https://placehold.co/600x400/png',
-              quantity: item.quantity,
-              frameSize: item.frameSize,
-              frameType: item.frameType,
-              engravingText: item.engravingText || undefined
-            })),
-            shippingAddress: {
-              address: orderWithItems.shippingAddress,
-              city: orderWithItems.city,
-              postalCode: orderWithItems.postalCode,
-              country: orderWithItems.country
-            }
-          };
-
-          // Send the email
-          const emailResult = await sendOrderConfirmationEmail(emailOrderData);
-          console.log('Order confirmation email sent:', emailResult.success);
-        }
-      } catch (emailError) {
-        // Log the error but don't fail the request
-        console.error('Error sending order confirmation email:', emailError);
-      }
       
       // Return the created order
       return NextResponse.json({

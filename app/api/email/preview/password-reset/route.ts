@@ -26,11 +26,7 @@ export async function POST(request: Request) {
     }
 
     // Render the email HTML
-    const html = await renderAsync(PasswordResetEmail({
-      adminName: resetData.adminName,
-      resetLink: resetData.resetLink,
-      expiryTime: resetData.expiryTime
-    }));
+    const html = await renderAsync(PasswordResetEmail(resetData));
 
     // Return the HTML
     return new NextResponse(JSON.stringify({ html }), {

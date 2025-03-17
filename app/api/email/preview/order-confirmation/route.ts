@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     const orderData = await request.json();
     
     // Validate required fields
-    if (!orderData.id || !orderData.customerName || !orderData.items) {
+    if (!orderData.orderId || !orderData.customerName || !orderData.items) {
       return new NextResponse(JSON.stringify({ error: 'Missing required order data' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },

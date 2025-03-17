@@ -154,9 +154,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <h1 className="text-3xl font-bold text-[#253946] mb-2">
               {product.name}
             </h1>
-            <div className="text-2xl font-semibold text-[#253946] mb-4">
-              ${product.price}
-            </div>
             <p className="text-[#253946] mb-6">
               {product.description}
             </p>
