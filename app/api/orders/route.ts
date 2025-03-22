@@ -85,6 +85,37 @@ export async function POST(req: NextRequest) {
     
     // Map frameSize and frameType from string to enum values
     const mapFrameSize = (size: string): FrameSize => {
+      // Check if the size is already a valid FrameSize enum value
+      if (Object.values(FrameSize).includes(size as FrameSize)) {
+        return size as FrameSize;
+      }
+      
+      // For legacy handling or mapping from display names
+      if (size.includes('8.5x8.5') || size === '8.5x8.5"') {
+        return FrameSize.SIZE_8_5X8_5;
+      } else if (size.includes('6x6') || size === '6x6"') {
+        return FrameSize.SIZE_6X6;
+      } else if (size.includes('8.5x12') || size === '8.5x12"') {
+        return FrameSize.SIZE_8_5X12;
+      } else if (size.includes('12x12') || size === '12x12"') {
+        return FrameSize.SIZE_12X12;
+      } else if (size.includes('12x16') || size === '12x16"') {
+        return FrameSize.SIZE_12X16;
+      } else if (size.includes('16x16') || size === '16x16"') {
+        return FrameSize.SIZE_16X16;
+      } else if (size.includes('16x20') || size === '16x20"') {
+        return FrameSize.SIZE_16X20;
+      } else if (size.includes('20x20') || size === '20x20"') {
+        return FrameSize.SIZE_20X20;
+      } else if (size.includes('20x28') || size === '20x28"') {
+        return FrameSize.SIZE_20X28;
+      } else if (size.includes('4.5x8.5') || size === '4.5x8.5"') {
+        return FrameSize.SIZE_4_5X8_5;
+      } else if (size.includes('6x12') || size === '6x12"') {
+        return FrameSize.SIZE_6X12;
+      }
+      
+      // Default fallbacks for legacy values
       return size.includes('10') ? FrameSize.LARGE : FrameSize.SMALL;
     };
     

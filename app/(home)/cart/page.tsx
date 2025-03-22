@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { useCartStore } from '@/lib/store/cart-store';
 import { formatPrice } from '@/lib/utils';
 import { toast } from 'sonner';
+import { frameSizeLabels, frameTypeLabels } from '@/lib/constants';
 
 export default function CartPage() {
   const router = useRouter();
@@ -120,8 +121,8 @@ export default function CartPage() {
                         <div className="flex flex-col justify-center">
                           <h3 className="font-medium text-[#253946]">{item.name}</h3>
                           <div className="text-sm text-[#95A7B5] mt-1">
-                            <div>Size: {item.options.frameSize === '8x8' ? '8" x 8"' : '10" x 10"'}</div>
-                            <div>Frame: {item.options.frameType === 'pine' ? 'Pine Wood' : 'Dark Wood'}</div>
+                            <div>Size: {frameSizeLabels[item.options.frameSize] || item.options.frameSize}</div>
+                            <div>Frame: {frameTypeLabels[item.options.frameType] || item.options.frameType}</div>
                             {item.options.engravingText && (
                               <div className="truncate max-w-[220px]">
                                 Engraving: {item.options.engravingText}

@@ -16,15 +16,22 @@ async function getFeaturedProducts() {
       },
     });
 
-    // Convert Decimal values to strings to avoid serialization issues
-    const serializedProducts = products.map((product: any) => ({
-      ...product,
-      price: product.price.toString(),
-      createdAt: product.createdAt.toISOString(),
-      updatedAt: product.updatedAt.toISOString(),
-    }));
+    // Fetch lowest price for each product based on its category
+    const productsWithPrices = await Promise.all(
+      products.map(async (product: any) => {
+        const lowestPrice = await getLowestPriceByCategory(product.category?.name);
+        
+        return {
+          ...product,
+          price: product.price.toString(),
+          createdAt: product.createdAt.toISOString(),
+          updatedAt: product.updatedAt.toISOString(),
+          lowestPrice
+        };
+      })
+    );
 
-    return serializedProducts;
+    return productsWithPrices;
   } catch (error) {
     console.error("Error fetching featured products:", error);
     return [];
@@ -99,7 +106,7 @@ export default async function HomePage() {
                     </h3>
                     <div className="flex justify-between items-center">
                       <span className="text-[#253946] font-medium">
-                        {formatPrice(getLowestPriceByCategory(product.category?.name))}
+                        From {formatPrice(product.lowestPrice)}
                       </span>
                       <span className="text-[#95A7B5] text-sm">
                         {product.category?.name}

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { useState, useEffect } from 'react';
 import {
   Select,
   SelectContent,
@@ -14,7 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { getLowestPriceByCategory, formatPrice } from '@/lib/services/pricing';
+import { getLowestPriceByCategory, formatPrice } from '@/lib/services/pricing-browser';
 
 interface ProductWithCategory extends Product {
   category: Category | null;
@@ -39,6 +40,52 @@ export default function ProductGrid({
 }: ProductGridProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  
+  // Track product prices
+  const [productPrices, setProductPrices] = useState<Record<string, number>>({});
+  const [loadingPrices, setLoadingPrices] = useState<boolean>(true);
+  
+  // Fetch prices for all products
+  useEffect(() => {
+    const fetchPrices = async () => {
+      try {
+        const prices: Record<string, number> = {};
+        
+        for (const product of products) {
+          const categoryName = product.category?.name;
+          const key = `${product.id}-${categoryName}`;
+          
+          if (!prices[key]) {
+            const price = await getLowestPriceByCategory(categoryName);
+            prices[key] = price;
+          }
+        }
+        
+        setProductPrices(prices);
+        setLoadingPrices(false);
+      } catch (error) {
+        console.error('Error fetching product prices:', error);
+        setLoadingPrices(false);
+      }
+    };
+    
+    fetchPrices();
+  }, [products]);
+  
+  // Get price for a product
+  const getProductPrice = (product: ProductWithCategory): string => {
+    const key = `${product.id}-${product.category?.name}`;
+    
+    if (loadingPrices) {
+      return 'Loading...';
+    }
+    
+    if (productPrices[key]) {
+      return formatPrice(productPrices[key]);
+    }
+    
+    return formatPrice(0);
+  };
   
   // Handle sort change
   const handleSortChange = (value: string) => {
@@ -187,7 +234,7 @@ export default function ProductGrid({
                   </p>
                   <div className="flex justify-between items-center mt-auto">
                     <span className="text-[#253946] font-medium">
-                      {formatPrice(getLowestPriceByCategory(product.category?.name))}
+                      {getProductPrice(product)}
                     </span>
                     <span className="text-[#95A7B5] text-sm">
                       {product.category?.name}

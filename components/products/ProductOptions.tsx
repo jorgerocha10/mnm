@@ -25,7 +25,7 @@ import {
 import { toast } from "sonner";
 import { useCartStore } from '@/lib/store/cart-store';
 import InteractiveMap from './InteractiveMap';
-import { getFrameSizePrice, formatPrice } from '@/lib/services/pricing';
+import { getFrameSizePrice, formatPrice } from '@/lib/services/pricing-browser';
 import { frameSizeLabels, frameTypeLabels } from '@/lib/constants';
 
 // All available frame types
@@ -95,9 +95,9 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
   const [frameType, setFrameType] = useState<string>(
     Array.isArray(product.frameTypes) ? product.frameTypes[0] : product.frameTypes
   );
-  const [currentPrice, setCurrentPrice] = useState<number>(
-    getFrameSizePrice(availableFrameSizes[0], product.category?.name)
-  );
+  const [currentPrice, setCurrentPrice] = useState<number>(0);
+  const [pricingLoaded, setPricingLoaded] = useState<boolean>(false);
+  const [frameSizePrices, setFrameSizePrices] = useState<Record<string, number>>({});
   const [locationType, setLocationType] = useState<'address' | 'coordinates'>('address');
   const [address, setAddress] = useState<string>('');
   const [latitude, setLatitude] = useState<string>('');
@@ -107,10 +107,42 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
   const [mapZoom, setMapZoom] = useState(13);
   const [mapOrientation, setMapOrientation] = useState<'horizontal' | 'vertical'>('horizontal');
   
-  // Update price when frame size changes
+  // Fetch price on initial load
   useEffect(() => {
-    setCurrentPrice(getFrameSizePrice(frameSize, product.category?.name));
+    const fetchInitialPrice = async () => {
+      try {
+        const price = await getFrameSizePrice(frameSize, product.category?.name);
+        setCurrentPrice(price);
+        setPricingLoaded(true);
+      } catch (error) {
+        console.error('Error fetching initial price:', error);
+        setCurrentPrice(0);
+        setPricingLoaded(true);
+      }
+    };
+    
+    fetchInitialPrice();
   }, [frameSize, product.category?.name]);
+  
+  // Fetch prices for all available frame sizes
+  useEffect(() => {
+    const fetchAllPrices = async () => {
+      try {
+        const prices: Record<string, number> = {};
+        
+        for (const size of availableFrameSizes) {
+          const price = await getFrameSizePrice(size, product.category?.name);
+          prices[size] = price;
+        }
+        
+        setFrameSizePrices(prices);
+      } catch (error) {
+        console.error('Error fetching all prices:', error);
+      }
+    };
+    
+    fetchAllPrices();
+  }, [availableFrameSizes, product.category?.name]);
   
   // Check if product is in Multi layers or Bas relief category
   const allowRotation = product.category?.name === 'Multi layers' || product.category?.name === 'Bas Relief';
@@ -127,6 +159,28 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
   // Handle frame size change
   const handleFrameSizeChange = (size: string) => {
     setFrameSize(size);
+    
+    // Update price asynchronously
+    const updatePrice = async () => {
+      try {
+        if (frameSizePrices[size]) {
+          setCurrentPrice(frameSizePrices[size]);
+        } else {
+          const price = await getFrameSizePrice(size, product.category?.name);
+          setCurrentPrice(price);
+          
+          // Update the prices map
+          setFrameSizePrices(prev => ({
+            ...prev,
+            [size]: price
+          }));
+        }
+      } catch (error) {
+        console.error('Error updating price:', error);
+      }
+    };
+    
+    updatePrice();
   };
   
   // Handle location selection from map
@@ -205,7 +259,7 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
     <div className="space-y-6">
       {/* Price Display */}
       <div className="text-2xl font-semibold text-[#253946]">
-        {formatPrice(currentPrice)}
+        {pricingLoaded ? formatPrice(currentPrice) : 'Loading price...'}
       </div>
       
       {/* Frame Size Selection */}
@@ -221,7 +275,8 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
           <SelectContent>
             {availableFrameSizes.map((size) => (
               <SelectItem key={size} value={size}>
-                {frameSizeLabels[size]} - {formatPrice(getFrameSizePrice(size, product.category?.name))}
+                {frameSizeLabels[size]} 
+                {frameSizePrices[size] ? ` - ${formatPrice(frameSizePrices[size])}` : ''}
               </SelectItem>
             ))}
           </SelectContent>

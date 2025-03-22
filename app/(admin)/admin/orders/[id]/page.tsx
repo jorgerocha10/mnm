@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { format } from 'date-fns';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 
 import {
   Card,
@@ -20,6 +21,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableFooter,
 } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
 import { PageHeader } from '@/components/admin/AdminHeader';
@@ -67,9 +69,19 @@ export default async function OrderPage({ params }: OrderPageProps) {
     notFound();
   }
 
+  // Debug location data availability
+  console.log('Order location data:', {
+    orderLatitude: order.latitude,
+    orderLongitude: order.longitude,
+    orderMapAddress: order.mapAddress,
+    firstItemLocation: order.orderItems?.[0]?.location,
+    firstItemMapZoom: order.orderItems?.[0]?.mapZoom,
+    firstItemMapOrientation: order.orderItems?.[0]?.mapOrientation,
+  });
+
   // Calculate totals
   const orderSubtotal = order.orderItems.reduce(
-    (sum, item) => sum + Number(item.price) * item.quantity,
+    (sum: number, item: any) => sum + Number(item.price) * item.quantity,
     0
   );
   
@@ -114,18 +126,66 @@ export default async function OrderPage({ params }: OrderPageProps) {
                 <p>{order.city}, {order.postalCode}</p>
                 <p>{order.country}</p>
               </div>
-              {(order.latitude && order.longitude) && (
+              {/* Map Location Section - Enhanced */}
+              {((order.latitude && order.longitude) || 
+                order.mapAddress || 
+                order.orderItems?.some((item: any) => item.location)) && (
                 <div>
                   <h3 className="font-medium mb-1 flex items-center">
                     <MapPin className="h-4 w-4 mr-1" />
                     Map Location
                   </h3>
-                  <p className="text-sm">
-                    Latitude: {order.latitude}, Longitude: {order.longitude}
-                  </p>
-                  {order.mapAddress && (
-                    <p className="text-sm mt-1">{order.mapAddress}</p>
-                  )}
+                  <div className="space-y-1 text-sm">
+                    {/* Show coordinates if available directly on order */}
+                    {(order.latitude && order.longitude) ? (
+                      <p>
+                        <span className="inline-block w-24 font-medium">Coordinates:</span> 
+                        {order.latitude}, {order.longitude}
+                      </p>
+                    ) : (
+                      /* Check if there's location in first order item */
+                      order.orderItems?.[0]?.location?.includes?.(',') && (
+                        <p>
+                          <span className="inline-block w-24 font-medium">Coordinates:</span> 
+                          {order.orderItems[0].location}
+                        </p>
+                      )
+                    )}
+
+                    {/* Show map address if available */}
+                    {order.mapAddress ? (
+                      <p>
+                        <span className="inline-block w-24 font-medium">Address:</span> 
+                        {order.mapAddress}
+                      </p>
+                    ) : (
+                      /* Check if there's address in first order item */
+                      order.orderItems?.[0]?.location && 
+                      typeof order.orderItems[0].location === 'string' &&
+                      !order.orderItems[0].location.includes(',') && (
+                        <p>
+                          <span className="inline-block w-24 font-medium">Address:</span> 
+                          {order.orderItems[0].location}
+                        </p>
+                      )
+                    )}
+                    
+                    {/* Show map zoom if available */}
+                    {order.orderItems.some((item: any) => item.mapZoom) && (
+                      <p>
+                        <span className="inline-block w-24 font-medium">Zoom Level:</span> 
+                        {order.orderItems[0].mapZoom || "Default"}
+                      </p>
+                    )}
+                    
+                    {/* Show map orientation if available */}
+                    {order.orderItems.some((item: any) => item.mapOrientation) && (
+                      <p>
+                        <span className="inline-block w-24 font-medium">Orientation:</span> 
+                        {order.orderItems[0].mapOrientation === 'horizontal' ? 'Horizontal' : 'Vertical'}
+                      </p>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -193,59 +253,81 @@ export default async function OrderPage({ params }: OrderPageProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>Product</TableHead>
+                <TableHead>Price</TableHead>
+                <TableHead>Quantity</TableHead>
                 <TableHead>Options</TableHead>
-                <TableHead className="text-right">Price</TableHead>
-                <TableHead className="text-center">Quantity</TableHead>
                 <TableHead className="text-right">Total</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {order.orderItems.map((item) => (
+              {order.orderItems.map((item: any) => (
                 <TableRow key={item.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
                       {item.product.images[0] && (
-                        <div className="h-16 w-16 rounded overflow-hidden bg-gray-100">
-                          {/* Image would go here, but we'll need to ensure next/image is configured */}
-                          <div 
-                            className="h-full w-full bg-cover bg-center" 
-                            style={{ 
-                              backgroundImage: `url(${item.product.images[0]})`,
-                              backgroundSize: 'cover'
-                            }}
+                        <div className="h-12 w-12 rounded-md overflow-hidden relative">
+                          <Image
+                            src={item.product.images[0]}
+                            alt={item.product.name}
+                            fill
+                            className="object-cover"
                           />
                         </div>
                       )}
                       <div>
                         <div className="font-medium">{item.product.name}</div>
-                        <div className="text-sm text-muted-foreground">SKU: {item.product.id.slice(0, 8)}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {item.product.id}
+                        </div>
                       </div>
                     </div>
                   </TableCell>
+                  <TableCell>${Number(item.price).toFixed(2)}</TableCell>
+                  <TableCell>{item.quantity}</TableCell>
                   <TableCell>
-                    <div className="text-sm space-y-1">
-                      <div>Frame: {item.frameType === 'PINE' ? 'Pine Wood' : 'Dark Wood'}</div>
-                      {item.frameSize && (
-                        <div>Size: {item.frameSize.replace('SIZE_', '').replace('_', '.').replace('X', 'x')}"</div>
-                      )}
-                      {item.mapOrientation && (
-                        <div>Orientation: {item.mapOrientation === 'horizontal' ? 'Horizontal' : 'Vertical'}</div>
-                      )}
-                      {item.engravingText && (
-                        <div className="text-xs truncate max-w-[200px]">
-                          Engraving: "{item.engravingText}"
-                        </div>
-                      )}
-                    </div>
+                    {item.frameType && <div>Frame: {item.frameType === 'PINE' ? 'Pine Wood' : 'Dark Wood'}</div>}
+                    {item.frameSize && (
+                      <div>
+                        Size: {
+                          item.frameSize === 'SMALL' ? 'SMALL (8.5x8.5")' :
+                          item.frameSize === 'LARGE' ? 'LARGE (12x16")' :
+                          `${item.frameSize} (${item.frameSize.replace('SIZE_', '').replace('_', '.').replace('X', 'x') + '"'})`
+                        }
+                      </div>
+                    )}
+                    {item.engravingText && <div>Engraving: "{item.engravingText}"</div>}
+                    {item.mapZoom && <div>Map Zoom: {item.mapZoom}</div>}
+                    {item.mapOrientation && <div>Orientation: {item.mapOrientation === 'horizontal' ? 'Horizontal' : 'Vertical'}</div>}
+                    {item.location && typeof item.location === 'string' && (
+                      <div>
+                        Location: {item.location.includes(',') 
+                          ? 'Coordinates' 
+                          : 'Address'
+                        }
+                        <span className="text-xs ml-1 block text-muted-foreground truncate max-w-[200px]">
+                          {item.location}
+                        </span>
+                      </div>
+                    )}
                   </TableCell>
-                  <TableCell className="text-right">${Number(item.price).toFixed(2)}</TableCell>
-                  <TableCell className="text-center">{item.quantity}</TableCell>
-                  <TableCell className="text-right font-medium">
-                    ${(Number(item.price) * item.quantity).toFixed(2)}
-                  </TableCell>
+                  <TableCell className="text-right">${(Number(item.price) * item.quantity).toFixed(2)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TableCell colSpan={4}>Subtotal</TableCell>
+                <TableCell className="text-right">${orderSubtotal.toFixed(2)}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell colSpan={4}>Shipping</TableCell>
+                <TableCell className="text-right">${shippingCost.toFixed(2)}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell colSpan={4}>Total</TableCell>
+                <TableCell className="text-right font-medium">${orderTotal.toFixed(2)}</TableCell>
+              </TableRow>
+            </TableFooter>
           </Table>
         </CardContent>
       </Card>
