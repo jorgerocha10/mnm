@@ -43,25 +43,12 @@ export async function getFrameSizePrice(frameSize: string, categoryName?: string
       catName = categoryName;
     }
     
-    // Convert frameSize string to FrameSize enum value if possible
-    let frameSizeEnum: FrameSize;
-    try {
-      frameSizeEnum = frameSize as FrameSize;
-    } catch (e) {
-      console.warn(`Invalid frame size: ${frameSize}, using fallback price`);
-      // Return fallback price for invalid frame sizes
-      if (categoryName === 'Key holders' && fallbackFrameSizePrices['KEY_HOLDERS'][frameSize]) {
-        return fallbackFrameSizePrices['KEY_HOLDERS'][frameSize];
-      }
-      return fallbackFrameSizePrices['DEFAULT'][frameSize] || 0;
-    }
-    
     // Find the category and related frame size price
     const category = await prisma.category.findFirst({
       where: { name: catName },
       include: {
         frameSizePrices: {
-          where: { frameSize: frameSizeEnum }
+          where: { frameSize: frameSize as any }
         }
       }
     });

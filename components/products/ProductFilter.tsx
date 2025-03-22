@@ -4,7 +4,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Category } from '@prisma/client';
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -14,7 +13,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Separator } from '@/components/ui/separator';
-import { ArrowRight, FilterIcon } from 'lucide-react';
+import { FilterIcon } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -26,24 +25,14 @@ import {
 interface ProductFilterProps {
   categories: Category[];
   selectedCategory?: string;
-  minPrice?: string;
-  maxPrice?: string;
 }
 
 export default function ProductFilter({
   categories,
   selectedCategory,
-  minPrice,
-  maxPrice,
 }: ProductFilterProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
-  // Price range state
-  const [priceRange, setPriceRange] = useState<[number, number]>([
-    minPrice ? parseInt(minPrice) : 0,
-    maxPrice ? parseInt(maxPrice) : 200,
-  ]);
   
   // Apply filters function
   const applyFilters = (params: URLSearchParams) => {
@@ -65,28 +54,11 @@ export default function ProductFilter({
     applyFilters(params);
   };
   
-  // Handle price range change
-  const handlePriceRangeChange = (values: number[]) => {
-    setPriceRange([values[0], values[1]]);
-  };
-  
-  // Apply price range after slider interaction ends
-  const handlePriceRangeApply = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    
-    params.set('minPrice', priceRange[0].toString());
-    params.set('maxPrice', priceRange[1].toString());
-    
-    applyFilters(params);
-  };
-  
   // Clear all filters
   const clearAllFilters = () => {
     const params = new URLSearchParams(searchParams.toString());
     
     params.delete('category');
-    params.delete('minPrice');
-    params.delete('maxPrice');
     params.delete('page');
     
     // Keep search query if exists
@@ -105,17 +77,10 @@ export default function ProductFilter({
     }
     
     router.push(`/products?${params.toString()}`);
-    
-    // Reset price range state
-    setPriceRange([0, 200]);
   };
   
   // Calculate if any filters are active
-  const hasActiveFilters = Boolean(
-    selectedCategory || 
-    minPrice || 
-    maxPrice
-  );
+  const hasActiveFilters = Boolean(selectedCategory);
   
   // Desktop filter component
   const FilterContent = () => (
@@ -158,34 +123,6 @@ export default function ProductFilter({
                   </Label>
                 </div>
               ))}
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-      
-      <Separator />
-      
-      {/* Price Range */}
-      <Accordion type="single" collapsible defaultValue="price">
-        <AccordionItem value="price" className="border-none">
-          <AccordionTrigger className="py-2 text-[#253946]">Price Range</AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-4">
-              <Slider
-                defaultValue={priceRange}
-                min={0}
-                max={200}
-                step={5}
-                value={priceRange}
-                onValueChange={handlePriceRangeChange}
-                onValueCommit={handlePriceRangeApply}
-                className="my-6"
-              />
-              <div className="flex justify-between items-center">
-                <span className="text-[#253946]">${priceRange[0]}</span>
-                <ArrowRight className="h-4 w-4 text-[#95A7B5]" />
-                <span className="text-[#253946]">${priceRange[1]}</span>
-              </div>
             </div>
           </AccordionContent>
         </AccordionItem>

@@ -26,10 +26,10 @@ model Product {
   images      String[]
   stock       Int         @default(0)
   frameTypes  FrameType   @default(PINE)
-  frameSizes  FrameSize?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   categoryId  String?
+  frameSizes  FrameSize?
   orderItems  OrderItem[]
   category    Category?   @relation(fields: [categoryId], references: [id])
   reviews     Review[]
@@ -57,39 +57,28 @@ model Order {
 }
 
 model OrderItem {
-  id             String     @id @default(cuid())
-  quantity       Int
-  price          Decimal    @db.Decimal(10, 2)
-  frameSize      FrameSize?
-  frameType      FrameType
-  engravingText  String?
-  orderId        String
-  productId      String
-  mapZoom        Int?       @default(13)
-  mapOrientation String?    @default("horizontal")
-  order          Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product        Product    @relation(fields: [productId], references: [id])
+  id            String     @id @default(cuid())
+  quantity      Int
+  price         Decimal    @db.Decimal(10, 2)
+  frameType     FrameType
+  engravingText String?
+  orderId       String
+  productId     String
+  mapZoom       Int?       @default(13)
+  frameSize     FrameSize?
+  mapOrientation String?   @default("horizontal")
+  order         Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product       Product    @relation(fields: [productId], references: [id])
 }
 
 model Category {
-  id              String           @id @default(cuid())
-  name            String
-  slug            String           @unique
-  image           String?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  frameSizePrices FrameSizePrice[]
-  products        Product[]
-}
-
-model FrameSizePrice {
-  id         String    @id @default(cuid())
-  frameSize  FrameSize
-  price      Decimal   @db.Decimal(10, 2)
-  categoryId String
-  category   Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-
-  @@unique([categoryId, frameSize])
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  image     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
 }
 
 model Review {
@@ -113,7 +102,6 @@ model Cart {
 model CartItem {
   id            String     @id @default(cuid())
   quantity      Int
-  frameSize     FrameSize?
   frameType     FrameType
   engravingText String?
   latitude      Float?
@@ -122,6 +110,7 @@ model CartItem {
   cartId        String
   productId     String
   mapZoom       Int?       @default(13)
+  frameSize     FrameSize?
   cart          Cart       @relation(fields: [cartId], references: [id], onDelete: Cascade)
 }
 
@@ -136,6 +125,8 @@ enum FrameType {
 }
 
 enum FrameSize {
+  SMALL
+  LARGE
   SIZE_6X6
   SIZE_8_5X8_5
   SIZE_8_5X12
@@ -145,16 +136,8 @@ enum FrameSize {
   SIZE_16X20
   SIZE_20X20
   SIZE_20X28
-  SMALL
-  LARGE
   SIZE_4_5X8_5
   SIZE_6X12
-  SIZE_20X30
-  SIZE_24X24
-  SIZE_24X30
-  SIZE_28X28
-  SIZE_28X35
-  SIZE_35X35
 }
 
 enum OrderStatus {
