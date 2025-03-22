@@ -3,29 +3,26 @@
 import { PrismaClient, FrameSize } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 
-// Fallback prices only used when database access fails
+// Fallback prices - used when DB access fails or for products without prices
 const fallbackFrameSizePrices: Record<string, Record<string, number>> = {
-  'KEY_HOLDERS': {
-    'SIZE_4_5X8_5': 104.34,
-    'SIZE_6X12': 184.43,
-  },
   'DEFAULT': {
-    'SIZE_6X6': 179.00,
-    'SIZE_8_5X8_5': 224.33,
-    'SIZE_8_5X12': 239.58,
-    'SIZE_12X12': 268.92,
-    'SIZE_12X16': 299.24,
-    'SIZE_16X16': 388.21,
-    'SIZE_16X20': 445.62,
-    'SIZE_20X20': 564.22,
-    'SIZE_20X30': 674.46,
-    'SIZE_24X24': 694.80,
-    'SIZE_24X30': 751.28,
-    'SIZE_28X28': 751.28,
-    'SIZE_28X35': 934.27,
-    'SIZE_35X35': 1172.84,
-    'SMALL': 224.33,
-    'LARGE': 299.61,
+    'SMALL': 39.99,
+    'LARGE': 49.99,
+    'SIZE_6X6': 39.99,
+    'SIZE_8_5X8_5': 44.99,
+    'SIZE_8_5X12': 49.99,
+    'SIZE_12X12': 54.99,
+    'SIZE_12X16': 59.99,
+    'SIZE_16X16': 64.99,
+    'SIZE_16X20': 69.99,
+    'SIZE_20X20': 74.99,
+    'SIZE_20X28': 79.99,
+    'SIZE_4_5X8_5': 34.99,
+    'SIZE_6X12': 44.99
+  },
+  'KEY_HOLDERS': {
+    'SIZE_4_5X8_5': 29.99,
+    'SIZE_6X12': 34.99
   }
 };
 
@@ -43,30 +40,38 @@ export async function getFrameSizePrice(frameSize: string, categoryName?: string
       catName = categoryName;
     }
     
-    // Find the category and related frame size price
-    const category = await prisma.category.findFirst({
-      where: { name: catName },
-      include: {
-        frameSizePrices: {
-          where: { frameSize: frameSize as any }
-        }
+    // Convert frameSize string to FrameSize enum value if possible
+    let frameSizeEnum: FrameSize;
+    try {
+      frameSizeEnum = frameSize as FrameSize;
+    } catch (e) {
+      console.warn(`Invalid frame size: ${frameSize}, using fallback price`);
+      // Return fallback price for invalid frame sizes
+      if (categoryName === 'Key holders' && fallbackFrameSizePrices['KEY_HOLDERS'][frameSize]) {
+        return fallbackFrameSizePrices['KEY_HOLDERS'][frameSize];
       }
+      return fallbackFrameSizePrices['DEFAULT'][frameSize] || 0;
+    }
+    
+    // Find the category
+    const category = await prisma.category.findFirst({
+      where: { name: catName }
     });
     
-    if (category && category.frameSizePrices.length > 0) {
-      // Return the price from database
-      return Number(category.frameSizePrices[0].price);
+    if (!category) {
+      console.warn(`Category not found: ${catName}, using fallback price`);
+      // If category not found, use fallback
+      if (categoryName === 'Key holders' && fallbackFrameSizePrices['KEY_HOLDERS'][frameSize]) {
+        return fallbackFrameSizePrices['KEY_HOLDERS'][frameSize];
+      }
+      return fallbackFrameSizePrices['DEFAULT'][frameSize] || 0;
     }
     
-    // If price not found in database, use fallback
-    console.warn(`Price not found in database for ${frameSize} in ${categoryName}, using fallback.`);
-    if (categoryName === 'Key holders' && fallbackFrameSizePrices['KEY_HOLDERS'][frameSize]) {
-      return fallbackFrameSizePrices['KEY_HOLDERS'][frameSize];
-    }
-    
-    return fallbackFrameSizePrices['DEFAULT'][frameSize] || 0;
+    // Use the appropriate pricing table based on category
+    const pricingKey = category.name === 'Key holders' ? 'KEY_HOLDERS' : 'DEFAULT';
+    return fallbackFrameSizePrices[pricingKey][frameSize] || 0;
   } catch (error) {
-    console.error('Error fetching frame size price from database:', error);
+    console.error('Error fetching frame size price:', error);
     // Use fallback in case of database error
     if (categoryName === 'Key holders' && fallbackFrameSizePrices['KEY_HOLDERS'][frameSize]) {
       return fallbackFrameSizePrices['KEY_HOLDERS'][frameSize];
@@ -81,49 +86,40 @@ export async function getFrameSizePrice(frameSize: string, categoryName?: string
  * @param categoryName The product category name
  * @returns The lowest price available for the category
  */
-export async function getLowestPriceByCategory(categoryName?: string | null): Promise<number> {
+export async function getLowestPriceByCategory(categoryName: string): Promise<number> {
   try {
-    // Convert category name for database query
-    let catName = 'City Maps'; // Default category
-    if (categoryName) {
-      catName = categoryName;
-    }
-    
-    // Find the category and all related frame size prices
+    // Find the category
     const category = await prisma.category.findFirst({
-      where: { name: catName },
-      include: {
-        frameSizePrices: true
-      }
+      where: { name: categoryName }
     });
     
-    if (category && category.frameSizePrices.length > 0) {
-      // Get all prices and find the lowest one
-      const prices = category.frameSizePrices.map((fsp: any) => Number(fsp.price));
+    if (!category) {
+      console.warn(`Category not found: ${categoryName}, using fallback lowest price`);
+      // If category not found, use fallback
+      if (categoryName === 'Key holders') {
+        let prices = Object.values(fallbackFrameSizePrices['KEY_HOLDERS']);
+        return Math.min(...prices);
+      }
+      
+      let prices = Object.values(fallbackFrameSizePrices['DEFAULT']);
       return Math.min(...prices);
     }
     
-    // If prices not found in database, use fallback
-    console.warn(`Prices not found in database for ${categoryName}, using fallback.`);
-    let prices = fallbackFrameSizePrices['DEFAULT'];
+    // Use the appropriate pricing table based on category
+    const pricingKey = category.name === 'Key holders' ? 'KEY_HOLDERS' : 'DEFAULT';
+    const prices = Object.values(fallbackFrameSizePrices[pricingKey]);
     
-    if (categoryName === 'Key holders') {
-      prices = fallbackFrameSizePrices['KEY_HOLDERS'];
-    }
-    
-    // Find the lowest price in the fallback price map
-    return Math.min(...Object.values(prices));
+    return Math.min(...prices);
   } catch (error) {
-    console.error('Error fetching lowest price from database:', error);
+    console.error('Error fetching lowest price:', error);
     // Use fallback in case of database error
-    let prices = fallbackFrameSizePrices['DEFAULT'];
-    
     if (categoryName === 'Key holders') {
-      prices = fallbackFrameSizePrices['KEY_HOLDERS'];
+      let prices = Object.values(fallbackFrameSizePrices['KEY_HOLDERS']);
+      return Math.min(...prices);
     }
     
-    // Find the lowest price in the fallback price map
-    return Math.min(...Object.values(prices));
+    let prices = Object.values(fallbackFrameSizePrices['DEFAULT']);
+    return Math.min(...prices);
   }
 }
 
@@ -133,9 +129,10 @@ export async function getLowestPriceByCategory(categoryName?: string | null): Pr
  * @returns Formatted price string in CAD
  */
 export function formatPrice(price: number): string {
-  return new Intl.NumberFormat('en-CA', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'CAD',
-    minimumFractionDigits: 2
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
   }).format(price);
 } 
