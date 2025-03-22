@@ -94,7 +94,7 @@ export async function DELETE(
       include: {
         _count: {
           select: {
-            products: true,
+            Product: true,
           },
         },
       },
@@ -108,7 +108,7 @@ export async function DELETE(
     }
 
     // Check if the category has products
-    if (category._count.products > 0) {
+    if (category._count.Product > 0) {
       return NextResponse.json(
         { message: 'Cannot delete category with products' },
         { status: 400 }

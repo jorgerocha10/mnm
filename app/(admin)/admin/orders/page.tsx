@@ -94,9 +94,9 @@ async function OrdersTable({ searchParams }: OrdersTableProps) {
     take: pageSize,
     skip,
     include: {
-      orderItems: {
+      OrderItem: {
         include: {
-          product: true,
+          Product: true,
         },
       },
     },
@@ -237,15 +237,15 @@ async function OrdersTable({ searchParams }: OrdersTableProps) {
 }
 
 interface OrderFiltersProps {
-  searchParams: Promise<{
+  searchParams: {
     status?: string;
     paymentStatus?: string;
     q?: string;
-  }>;
+  };
 }
 
 function OrderFilters({ searchParams }: OrderFiltersProps) {
-  const { status, paymentStatus, q } = searchParams as any;
+  const { status, paymentStatus, q } = searchParams;
 
   return (
     <div className="flex flex-col sm:flex-row gap-4">
@@ -294,7 +294,12 @@ function OrderFilters({ searchParams }: OrderFiltersProps) {
 export default async function OrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<OrderFiltersProps['searchParams'] & OrdersTableProps['searchParams']>;
+  searchParams: {
+    status?: string;
+    paymentStatus?: string;
+    q?: string;
+    page?: string;
+  };
 }) {
   const session = await auth();
 
@@ -324,11 +329,11 @@ export default async function OrdersPage({
             </form>
             <Separator className="my-6" />
             <Suspense fallback={<OrdersTableSkeleton />}>
-              <OrdersTable searchParams={searchParams} />
+              <OrdersTable searchParams={Promise.resolve(searchParams)} />
             </Suspense>
           </CardContent>
         </Card>
       </div>
     </>
   );
-} 
+}

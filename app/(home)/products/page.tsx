@@ -91,7 +91,7 @@ async function getProducts(searchParams: {
       skip: (page - 1) * pageSize,
       take: pageSize,
       include: {
-        category: true,
+        Category: true,
       },
     });
     

@@ -83,26 +83,23 @@ export default function ProductFilter({
   const hasActiveFilters = Boolean(selectedCategory);
   
   // Desktop filter component
-  const FilterContent = ({ showHeader = true }) => (
+  const FilterContent = () => (
     <div className="space-y-6">
       {/* Filter Header */}
-      {showHeader && (
-        <>
-          <div className="flex justify-between items-center">
-            <h3 className="font-medium text-lg text-[#253946]">Filters</h3>
-            {hasActiveFilters && (
-              <Button
-                variant="ghost"
-                className="text-[#95A7B5] hover:text-[#A76825]"
-                onClick={clearAllFilters}
-              >
-                Clear All
-              </Button>
-            )}
-          </div>
-          <Separator />
-        </>
-      )}
+      <div className="flex justify-between items-center">
+        <h3 className="font-medium text-lg text-[#253946]">Filters</h3>
+        {hasActiveFilters && (
+          <Button
+            variant="ghost"
+            className="text-[#95A7B5] hover:text-[#A76825]"
+            onClick={clearAllFilters}
+          >
+            Clear All
+          </Button>
+        )}
+      </div>
+      
+      <Separator />
       
       {/* Categories */}
       <Accordion type="single" collapsible defaultValue="categories">
@@ -137,7 +134,7 @@ export default function ProductFilter({
     <>
       {/* Desktop Filter */}
       <div className="hidden lg:block sticky top-24">
-        <FilterContent showHeader={true} />
+        <FilterContent />
       </div>
       
       {/* Mobile Filter */}
@@ -149,21 +146,13 @@ export default function ProductFilter({
               Filters
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-[300px] sm:w-[350px] overflow-auto p-6">
-            <SheetHeader className="mb-6">
+          <SheetContent side="left" className="w-[300px] sm:w-[350px] overflow-auto">
+            <SheetHeader>
               <SheetTitle>Filters</SheetTitle>
-              {hasActiveFilters && (
-                <Button
-                  variant="ghost"
-                  className="text-[#95A7B5] hover:text-[#A76825]"
-                  onClick={clearAllFilters}
-                >
-                  Clear All
-                </Button>
-              )}
             </SheetHeader>
-            <Separator className="mb-6" />
-            <FilterContent showHeader={false} />
+            <div className="mt-6 px-4 pb-6">
+              <FilterContent />
+            </div>
           </SheetContent>
         </Sheet>
       </div>

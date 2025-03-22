@@ -45,9 +45,9 @@ async function getOrderDetails(id: string) {
   return await prisma.order.findUnique({
     where: { id },
     include: {
-      orderItems: {
+      OrderItem: {
         include: {
-          product: true,
+          Product: true,
         },
       },
     },
@@ -74,13 +74,13 @@ export default async function OrderPage({ params }: OrderPageProps) {
     orderLatitude: order.latitude,
     orderLongitude: order.longitude,
     orderMapAddress: order.mapAddress,
-    firstItemLocation: order.orderItems?.[0]?.location,
-    firstItemMapZoom: order.orderItems?.[0]?.mapZoom,
-    firstItemMapOrientation: order.orderItems?.[0]?.mapOrientation,
+    firstItemLocation: order.OrderItem?.[0]?.location,
+    firstItemMapZoom: order.OrderItem?.[0]?.mapZoom,
+    firstItemMapOrientation: order.OrderItem?.[0]?.mapOrientation,
   });
 
   // Calculate totals
-  const orderSubtotal = order.orderItems.reduce(
+  const orderSubtotal = order.OrderItem.reduce(
     (sum: number, item: any) => sum + Number(item.price) * item.quantity,
     0
   );
@@ -129,7 +129,7 @@ export default async function OrderPage({ params }: OrderPageProps) {
               {/* Map Location Section - Enhanced */}
               {((order.latitude && order.longitude) || 
                 order.mapAddress || 
-                order.orderItems?.some((item: any) => item.location)) && (
+                order.OrderItem?.some((item: any) => item.location)) && (
                 <div>
                   <h3 className="font-medium mb-1 flex items-center">
                     <MapPin className="h-4 w-4 mr-1" />
@@ -144,10 +144,10 @@ export default async function OrderPage({ params }: OrderPageProps) {
                       </p>
                     ) : (
                       /* Check if there's location in first order item */
-                      order.orderItems?.[0]?.location?.includes?.(',') && (
+                      order.OrderItem?.[0]?.location?.includes?.(',') && (
                         <p>
                           <span className="inline-block w-24 font-medium">Coordinates:</span> 
-                          {order.orderItems[0].location}
+                          {order.OrderItem[0].location}
                         </p>
                       )
                     )}
@@ -160,29 +160,29 @@ export default async function OrderPage({ params }: OrderPageProps) {
                       </p>
                     ) : (
                       /* Check if there's address in first order item */
-                      order.orderItems?.[0]?.location && 
-                      typeof order.orderItems[0].location === 'string' &&
-                      !order.orderItems[0].location.includes(',') && (
+                      order.OrderItem?.[0]?.location && 
+                      typeof order.OrderItem[0].location === 'string' &&
+                      !order.OrderItem[0].location.includes(',') && (
                         <p>
                           <span className="inline-block w-24 font-medium">Address:</span> 
-                          {order.orderItems[0].location}
+                          {order.OrderItem[0].location}
                         </p>
                       )
                     )}
                     
                     {/* Show map zoom if available */}
-                    {order.orderItems.some((item: any) => item.mapZoom) && (
+                    {order.OrderItem.some((item: any) => item.mapZoom) && (
                       <p>
                         <span className="inline-block w-24 font-medium">Zoom Level:</span> 
-                        {order.orderItems[0].mapZoom || "Default"}
+                        {order.OrderItem[0].mapZoom || "Default"}
                       </p>
                     )}
                     
                     {/* Show map orientation if available */}
-                    {order.orderItems.some((item: any) => item.mapOrientation) && (
+                    {order.OrderItem.some((item: any) => item.mapOrientation) && (
                       <p>
                         <span className="inline-block w-24 font-medium">Orientation:</span> 
-                        {order.orderItems[0].mapOrientation === 'horizontal' ? 'Horizontal' : 'Vertical'}
+                        {order.OrderItem[0].mapOrientation === 'horizontal' ? 'Horizontal' : 'Vertical'}
                       </p>
                     )}
                   </div>
@@ -245,7 +245,7 @@ export default async function OrderPage({ params }: OrderPageProps) {
         <CardHeader>
           <CardTitle>Order Items</CardTitle>
           <CardDescription>
-            {order.orderItems.length} item{order.orderItems.length !== 1 ? 's' : ''} purchased
+            {order.OrderItem.length} item{order.OrderItem.length !== 1 ? 's' : ''} purchased
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -260,24 +260,24 @@ export default async function OrderPage({ params }: OrderPageProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {order.orderItems.map((item: any) => (
+              {order.OrderItem.map((item: any) => (
                 <TableRow key={item.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      {item.product.images[0] && (
+                      {item.Product.images[0] && (
                         <div className="h-12 w-12 rounded-md overflow-hidden relative">
                           <Image
-                            src={item.product.images[0]}
-                            alt={item.product.name}
+                            src={item.Product.images[0]}
+                            alt={item.Product.name}
                             fill
                             className="object-cover"
                           />
                         </div>
                       )}
                       <div>
-                        <div className="font-medium">{item.product.name}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {item.product.id}
+                        <div className="font-medium">{item.Product.name}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {item.Product.id}
                         </div>
                       </div>
                     </div>

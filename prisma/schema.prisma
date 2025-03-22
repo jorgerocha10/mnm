@@ -8,35 +8,61 @@ datasource db {
 }
 
 model Admin {
-  id        String   @id @default(cuid())
+  id        String   @id
   name      String
   email     String   @unique
   password  String
   role      Role     @default(ADMIN)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime
 }
 
-model Product {
-  id          String      @id @default(cuid())
-  name        String
-  slug        String      @unique
-  description String
-  price       Decimal     @db.Decimal(10, 2)
-  images      String[]
-  stock       Int         @default(0)
-  frameTypes  FrameType   @default(PINE)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  categoryId  String?
-  frameSizes  FrameSize?
-  orderItems  OrderItem[]
-  category    Category?   @relation(fields: [categoryId], references: [id])
-  reviews     Review[]
+model Cart {
+  id        String     @id
+  cartId    String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime
+  CartItem  CartItem[]
+}
+
+model CartItem {
+  id            String     @id
+  quantity      Int
+  frameSize     FrameSize?
+  frameType     FrameType
+  engravingText String?
+  latitude      Float?
+  longitude     Float?
+  mapAddress    String?
+  cartId        String
+  productId     String
+  mapZoom       Int?       @default(13)
+  Cart          Cart       @relation(fields: [cartId], references: [id], onDelete: Cascade)
+}
+
+model Category {
+  id             String           @id
+  name           String
+  slug           String           @unique
+  image          String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime
+  FrameSizePrice FrameSizePrice[]
+  Product        Product[]
+}
+
+model FrameSizePrice {
+  id         String    @id
+  frameSize  FrameSize
+  price      Decimal   @db.Decimal(10, 2)
+  categoryId String
+  Category   Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, frameSize])
 }
 
 model Order {
-  id              String        @id @default(cuid())
+  id              String        @id
   customerEmail   String
   customerName    String
   status          OrderStatus   @default(PENDING)
@@ -51,82 +77,55 @@ model Order {
   paymentIntentId String?
   paymentStatus   PaymentStatus @default(PENDING)
   createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  updatedAt       DateTime
   mapZoom         Int?          @default(13)
-  orderItems      OrderItem[]
+  OrderItem       OrderItem[]
 }
 
 model OrderItem {
-  id            String     @id @default(cuid())
-  quantity      Int
-  price         Decimal    @db.Decimal(10, 2)
-  frameType     FrameType
-  engravingText String?
-  orderId       String
-  productId     String
-  mapZoom       Int?       @default(13)
-  frameSize     FrameSize?
-  mapOrientation String?   @default("horizontal")
-  order         Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product       Product    @relation(fields: [productId], references: [id])
+  id             String     @id
+  quantity       Int
+  price          Decimal    @db.Decimal(10, 2)
+  frameSize      FrameSize?
+  frameType      FrameType
+  engravingText  String?
+  orderId        String
+  productId      String
+  mapZoom        Int?       @default(13)
+  mapOrientation String?    @default("horizontal")
+  Order          Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  Product        Product    @relation(fields: [productId], references: [id])
 }
 
-model Category {
-  id        String    @id @default(cuid())
-  name      String
-  slug      String    @unique
-  image     String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  products  Product[]
+model Product {
+  id          String      @id
+  name        String
+  slug        String      @unique
+  description String
+  price       Decimal     @db.Decimal(10, 2)
+  images      String[]
+  stock       Int         @default(0)
+  frameTypes  FrameType   @default(PINE)
+  frameSizes  FrameSize?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime
+  categoryId  String?
+  OrderItem   OrderItem[]
+  Category    Category?   @relation(fields: [categoryId], references: [id])
+  Review      Review[]
 }
 
 model Review {
-  id           String   @id @default(cuid())
+  id           String   @id
   rating       Int      @db.SmallInt
   comment      String
   customerName String
   createdAt    DateTime @default(now())
   productId    String
-  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-}
-
-model Cart {
-  id        String     @id @default(cuid())
-  cartId    String     @unique
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  cartItems CartItem[]
-}
-
-model CartItem {
-  id            String     @id @default(cuid())
-  quantity      Int
-  frameType     FrameType
-  engravingText String?
-  latitude      Float?
-  longitude     Float?
-  mapAddress    String?
-  cartId        String
-  productId     String
-  mapZoom       Int?       @default(13)
-  frameSize     FrameSize?
-  cart          Cart       @relation(fields: [cartId], references: [id], onDelete: Cascade)
-}
-
-enum Role {
-  ADMIN
-  SUPERADMIN
-}
-
-enum FrameType {
-  PINE
-  DARK
+  Product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
 enum FrameSize {
-  SMALL
-  LARGE
   SIZE_6X6
   SIZE_8_5X8_5
   SIZE_8_5X12
@@ -136,8 +135,21 @@ enum FrameSize {
   SIZE_16X20
   SIZE_20X20
   SIZE_20X28
+  SMALL
+  LARGE
   SIZE_4_5X8_5
   SIZE_6X12
+  SIZE_20X30
+  SIZE_24X24
+  SIZE_24X30
+  SIZE_28X28
+  SIZE_28X35
+  SIZE_35X35
+}
+
+enum FrameType {
+  PINE
+  DARK
 }
 
 enum OrderStatus {
@@ -153,4 +165,9 @@ enum PaymentStatus {
   PAID
   FAILED
   REFUNDED
+}
+
+enum Role {
+  ADMIN
+  SUPERADMIN
 }

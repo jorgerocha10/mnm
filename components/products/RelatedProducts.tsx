@@ -26,7 +26,7 @@ interface SerializedProduct {
   createdAt: string;
   updatedAt: string;
   categoryId: string | null;
-  category: SerializedCategory | null;
+  Category: SerializedCategory | null;
 }
 
 interface RelatedProductsProps {
@@ -63,7 +63,7 @@ export default function RelatedProducts({ products, categoryName }: RelatedProdu
                     ${product.price}
                   </span>
                   <span className="text-[#95A7B5] text-sm">
-                    {product.category?.name}
+                    {product.Category?.name}
                   </span>
                 </div>
               </CardContent>

@@ -47,15 +47,15 @@ export async function getFrameSizePrice(frameSize: string, categoryName?: string
     const category = await prisma.category.findFirst({
       where: { name: catName },
       include: {
-        frameSizePrices: {
+        FrameSizePrice: {
           where: { frameSize: frameSize as any }
         }
       }
     });
     
-    if (category && category.frameSizePrices.length > 0) {
+    if (category && category.FrameSizePrice.length > 0) {
       // Return the price from database
-      return Number(category.frameSizePrices[0].price);
+      return Number(category.FrameSizePrice[0].price);
     }
     
     // If price not found in database, use fallback
@@ -93,13 +93,13 @@ export async function getLowestPriceByCategory(categoryName?: string | null): Pr
     const category = await prisma.category.findFirst({
       where: { name: catName },
       include: {
-        frameSizePrices: true
+        FrameSizePrice: true
       }
     });
     
-    if (category && category.frameSizePrices.length > 0) {
+    if (category && category.FrameSizePrice.length > 0) {
       // Get all prices and find the lowest one
-      const prices = category.frameSizePrices.map((fsp: any) => Number(fsp.price));
+      const prices = category.FrameSizePrice.map((fsp: any) => Number(fsp.price));
       return Math.min(...prices);
     }
     

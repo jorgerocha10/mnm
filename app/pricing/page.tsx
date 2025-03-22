@@ -3,14 +3,14 @@ import { FrameSizePrice, Category } from '@prisma/client';
 import { formatPrice } from '@/lib/services/pricing-browser';
 
 interface CategoryWithPrices extends Category {
-  frameSizePrices: FrameSizePrice[];
+  FrameSizePrice: FrameSizePrice[];
 }
 
 export default async function PricingPage() {
   // Fetch all categories with frame size prices
   const categories = await prisma.category.findMany({
     include: {
-      frameSizePrices: true
+      FrameSizePrice: true
     }
   }) as CategoryWithPrices[];
 
@@ -24,7 +24,7 @@ export default async function PricingPage() {
             {category.name}
           </h2>
           
-          {category.frameSizePrices.length > 0 ? (
+          {category.FrameSizePrice.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full border-collapse">
                 <thead>
@@ -34,7 +34,7 @@ export default async function PricingPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {category.frameSizePrices.map((price: FrameSizePrice) => (
+                  {category.FrameSizePrice.map((price: FrameSizePrice) => (
                     <tr key={`${category.id}-${price.frameSize}`} className="border-b hover:bg-[#F7F5F6]">
                       <td className="px-4 py-2 border">{price.frameSize}</td>
                       <td className="px-4 py-2 border">{formatPrice(parseFloat(price.price.toString()))}</td>

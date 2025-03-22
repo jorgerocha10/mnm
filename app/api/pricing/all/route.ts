@@ -7,15 +7,15 @@ export async function GET() {
     // Get all categories
     const categories = await prisma.category.findMany({
       include: {
-        frameSizePrices: true
+        FrameSizePrice: true
       }
     });
 
     // Format the data for display
-    const formattedData = categories.map((category: Category & { frameSizePrices: FrameSizePrice[] }) => ({
+    const formattedData = categories.map((category: Category & { FrameSizePrice: FrameSizePrice[] }) => ({
       categoryName: category.name,
       categorySlug: category.slug,
-      prices: category.frameSizePrices.map((price: FrameSizePrice) => ({
+      prices: category.FrameSizePrice.map((price: FrameSizePrice) => ({
         frameSize: price.frameSize,
         price: parseFloat(price.price.toString())
       }))

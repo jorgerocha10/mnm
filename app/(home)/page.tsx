@@ -12,14 +12,14 @@ async function getFeaturedProducts() {
     const products = await prisma.product.findMany({
       take: 4,
       include: {
-        category: true,
+        Category: true,
       },
     });
 
     // Fetch lowest price for each product based on its category
     const productsWithPrices = await Promise.all(
       products.map(async (product: any) => {
-        const lowestPrice = await getLowestPriceByCategory(product.category?.name);
+        const lowestPrice = await getLowestPriceByCategory(product.Category?.name);
         
         return {
           ...product,
@@ -109,7 +109,7 @@ export default async function HomePage() {
                         From {formatPrice(product.lowestPrice)}
                       </span>
                       <span className="text-[#95A7B5] text-sm">
-                        {product.category?.name}
+                        {product.Category?.name}
                       </span>
                     </div>
                   </CardContent>

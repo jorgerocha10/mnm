@@ -7,7 +7,7 @@ async function listFrameSizePrices() {
     // Get all categories with frame size prices
     const categories = await prisma.category.findMany({
       include: {
-        frameSizePrices: true
+        FrameSizePrice: true
       }
     });
 
@@ -24,13 +24,13 @@ async function listFrameSizePrices() {
     for (const category of categories) {
       console.log(`\n[Category: ${category.name}]`);
       
-      if (category.frameSizePrices.length === 0) {
+      if (category.FrameSizePrice.length === 0) {
         console.log('  No frame size prices found for this category.');
         continue;
       }
       
       // Display prices sorted by frame size
-      const sortedPrices = [...category.frameSizePrices].sort((a, b) => 
+      const sortedPrices = [...category.FrameSizePrice].sort((a, b) => 
         a.frameSize.localeCompare(b.frameSize)
       );
       

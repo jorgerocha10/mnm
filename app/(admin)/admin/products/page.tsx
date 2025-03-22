@@ -63,7 +63,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   }
 
   if (category) {
-    where.category = {
+    where.Category = {
       slug: category,
     };
   }
@@ -88,7 +88,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     skip,
     take: pageSize,
     include: {
-      category: true,
+      Category: true,
     },
   });
 
@@ -232,10 +232,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                     </div>
                   </TableCell>
                   <TableCell>
-                    {product.category ? (
-                      <Badge variant="outline">{product.category.name}</Badge>
+                    {product.Category ? (
+                      <Badge variant="outline">{product.Category.name}</Badge>
                     ) : (
-                      <span className="text-[#95A7B5] text-sm">None</span>
+                      <span className="text-muted-foreground">No category</span>
                     )}
                   </TableCell>
                   <TableCell>{formatCurrency(Number(product.price))}</TableCell>

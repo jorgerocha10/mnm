@@ -18,7 +18,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getLowestPriceByCategory, formatPrice } from '@/lib/services/pricing-browser';
 
 interface ProductWithCategory extends Product {
-  category: Category | null;
+  Category: Category | null;
 }
 
 interface PaginationProps {
@@ -52,7 +52,7 @@ export default function ProductGrid({
         const prices: Record<string, number> = {};
         
         for (const product of products) {
-          const categoryName = product.category?.name;
+          const categoryName = product.Category?.name;
           const key = `${product.id}-${categoryName}`;
           
           if (!prices[key]) {
@@ -74,7 +74,7 @@ export default function ProductGrid({
   
   // Get price for a product
   const getProductPrice = (product: ProductWithCategory): string => {
-    const key = `${product.id}-${product.category?.name}`;
+    const key = `${product.id}-${product.Category?.name}`;
     
     if (loadingPrices) {
       return 'Loading...';
@@ -232,12 +232,12 @@ export default function ProductGrid({
                   <p className="text-[#253946]/70 text-sm mb-4 line-clamp-2">
                     {product.description}
                   </p>
-                  <div className="flex justify-between items-center mt-auto">
-                    <span className="text-[#253946] font-medium">
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg font-semibold text-[#253946]">
                       {getProductPrice(product)}
                     </span>
                     <span className="text-[#95A7B5] text-sm">
-                      {product.category?.name}
+                      {product.Category?.name}
                     </span>
                   </div>
                 </CardContent>

@@ -58,7 +58,7 @@ interface ProductOptionsProps {
     createdAt: string;
     updatedAt: string;
     categoryId: string | null;
-    category?: {
+    Category?: {
       id: string;
       name: string;
       slug: string;
@@ -83,7 +83,7 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
   
   // Get available frame sizes based on category
   const getAvailableFrameSizes = () => {
-    if (product.category?.name === 'Key holders') {
+    if (product.Category?.name === 'Key holders') {
       return ['SIZE_4_5X8_5', 'SIZE_6X12'];
     }
     return allFrameSizes;
@@ -107,11 +107,39 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
   const [mapZoom, setMapZoom] = useState(13);
   const [mapOrientation, setMapOrientation] = useState<'horizontal' | 'vertical'>('horizontal');
   
+  // Initialize map and location search
+  const initializeMapTool = () => {
+    // For now, just set up basic state
+    // This would typically initialize a mapping tool or service
+    console.log('Map initialization for product:', product.id);
+    
+    // In a real implementation, this would:
+    // 1. Initialize a map library (like Mapbox, Google Maps, etc.)
+    // 2. Set up location search functionality
+    // 3. Handle user interaction with the map
+  };
+  
+  // Load frame size prices
+  const loadFrameSizePrices = async () => {
+    try {
+      const prices: Record<string, number> = {};
+      
+      for (const size of availableFrameSizes) {
+        const price = await getFrameSizePrice(size, product.Category?.name);
+        prices[size] = price;
+      }
+      
+      setFrameSizePrices(prices);
+    } catch (error) {
+      console.error('Error loading frame size prices:', error);
+    }
+  };
+  
   // Fetch price on initial load
   useEffect(() => {
     const fetchInitialPrice = async () => {
       try {
-        const price = await getFrameSizePrice(frameSize, product.category?.name);
+        const price = await getFrameSizePrice(frameSize, product.Category?.name);
         setCurrentPrice(price);
         setPricingLoaded(true);
       } catch (error) {
@@ -122,7 +150,7 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
     };
     
     fetchInitialPrice();
-  }, [frameSize, product.category?.name]);
+  }, [frameSize, product.Category?.name]);
   
   // Fetch prices for all available frame sizes
   useEffect(() => {
@@ -131,7 +159,7 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
         const prices: Record<string, number> = {};
         
         for (const size of availableFrameSizes) {
-          const price = await getFrameSizePrice(size, product.category?.name);
+          const price = await getFrameSizePrice(size, product.Category?.name);
           prices[size] = price;
         }
         
@@ -142,10 +170,10 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
     };
     
     fetchAllPrices();
-  }, [availableFrameSizes, product.category?.name]);
+  }, [availableFrameSizes, product.Category?.name]);
   
   // Check if product is in Multi layers or Bas relief category
-  const allowRotation = product.category?.name === 'Multi layers' || product.category?.name === 'Bas Relief';
+  const allowRotation = product.Category?.name === 'Multi layers' || product.Category?.name === 'Bas Relief';
   
   // Determine if the current frame size is square
   const isSquare = [
@@ -166,7 +194,7 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
         if (frameSizePrices[size]) {
           setCurrentPrice(frameSizePrices[size]);
         } else {
-          const price = await getFrameSizePrice(size, product.category?.name);
+          const price = await getFrameSizePrice(size, product.Category?.name);
           setCurrentPrice(price);
           
           // Update the prices map
@@ -183,6 +211,21 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
     updatePrice();
   };
   
+  // Handle frame type change
+  const handleFrameTypeChange = (type: string) => {
+    setFrameType(type);
+  };
+  
+  // Handle location type change
+  const handleLocationTypeChange = (type: 'address' | 'coordinates') => {
+    setLocationType(type);
+  };
+  
+  // Handle orientation change
+  const handleOrientationChange = (newOrientation: 'horizontal' | 'vertical') => {
+    setMapOrientation(newOrientation);
+  };
+  
   // Handle location selection from map
   const handleLocationSelect = (location: {
     address?: string;
@@ -197,11 +240,6 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
     setLatitude(location.coordinates.lat.toString());
     setLongitude(location.coordinates.lng.toString());
     setMapZoom(location.zoom);
-  };
-  
-  // Handle orientation change
-  const handleOrientationChange = (newOrientation: 'horizontal' | 'vertical') => {
-    setMapOrientation(newOrientation);
   };
   
   // Handle add to cart
@@ -255,6 +293,22 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
     setQuantity(value);
   };
   
+  // Only initialize mapTool for products that need a map
+  useEffect(() => {
+    // Hide map for key holders since they don't need a map
+    if (product.Category?.name === 'Key holders') {
+      return;
+    }
+    
+    // Initialize map and location search
+    initializeMapTool();
+  }, [product.id]);
+
+  // Load frame size prices when component mounts
+  useEffect(() => {
+    loadFrameSizePrices();
+  }, [frameSize, product.Category?.name]);
+
   return (
     <div className="space-y-6">
       {/* Price Display */}
@@ -264,18 +318,17 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
       
       {/* Frame Size Selection */}
       <div>
-        <h3 className="text-sm font-medium text-[#253946] mb-2">Frame Size</h3>
-        <Select 
-          value={frameSize} 
-          onValueChange={handleFrameSizeChange}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select a frame size" />
+        <Label htmlFor="frame-size" className="text-[#253946] font-medium block mb-2">
+          Frame Size
+        </Label>
+        <Select value={frameSize} onValueChange={handleFrameSizeChange}>
+          <SelectTrigger id="frame-size" className="w-full">
+            <SelectValue placeholder="Select frame size" />
           </SelectTrigger>
           <SelectContent>
-            {availableFrameSizes.map((size) => (
+            {availableFrameSizes.map(size => (
               <SelectItem key={size} value={size}>
-                {frameSizeLabels[size]} 
+                {frameSizeLabels[size as FrameSize] || size}
                 {frameSizePrices[size] ? ` - ${formatPrice(frameSizePrices[size])}` : ''}
               </SelectItem>
             ))}
@@ -285,166 +338,232 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
       
       {/* Frame Type Selection */}
       <div>
-        <h3 className="text-sm font-medium text-[#253946] mb-2">Frame Style</h3>
-        <Select 
-          value={frameType} 
-          onValueChange={setFrameType}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select a frame style" />
-          </SelectTrigger>
-          <SelectContent>
-            {allFrameTypes.map((type) => (
-              <SelectItem key={type} value={type}>
-                {frameTypeLabels[type]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Label htmlFor="frame-type" className="text-[#253946] font-medium block mb-2">
+          Frame Type
+        </Label>
+        <div className="grid grid-cols-2 gap-4">
+          {allFrameTypes.map(type => (
+            <Button
+              key={type}
+              type="button"
+              variant={frameType === type ? "default" : "outline"}
+              onClick={() => handleFrameTypeChange(type)}
+              className={`h-auto py-3 px-4 ${
+                frameType === type ? 'bg-[#A76825] text-white hover:bg-[#8c571e]' : 'border-[#95A7B5]'
+              }`}
+            >
+              {frameTypeLabels[type as FrameType] || type}
+            </Button>
+          ))}
+        </div>
       </div>
       
-      {/* Location Input */}
-      <div>
-        <div className="flex items-center space-x-2 mb-3">
-          <MapPin className="w-4 h-4 text-[#A76825]" />
-          <h3 className="text-sm font-medium text-[#253946]">Location</h3>
-        </div>
-        
-        {/* Interactive Map */}
-        <div className="mb-6">
-          <InteractiveMap
-            frameType={frameType}
-            frameSize={frameSize}
-            initialAddress={address}
-            initialCoordinates={latitude && longitude ? { lat: parseFloat(latitude), lng: parseFloat(longitude) } : undefined}
-            onLocationSelect={handleLocationSelect}
-            showRotate={allowRotation}
-            orientation={mapOrientation}
-            onOrientationChange={handleOrientationChange}
-          />
-        </div>
-        
-        <Tabs 
-          value={locationType} 
-          onValueChange={(value) => setLocationType(value as 'address' | 'coordinates')}
-          className="w-full"
-        >
-          <TabsList className="grid grid-cols-2 mb-4">
-            <TabsTrigger value="address">Address</TabsTrigger>
-            <TabsTrigger value="coordinates">Coordinates</TabsTrigger>
-          </TabsList>
+      {/* Map Location */}
+      {product.Category?.name !== 'Key holders' && (
+        <div>
+          <div className="flex justify-between items-center mb-2">
+            <Label className="text-[#253946] font-medium">Location</Label>
+            <Tabs
+              defaultValue="address"
+              value={locationType}
+              onValueChange={(value) => handleLocationTypeChange(value as 'address' | 'coordinates')}
+              className="w-auto"
+            >
+              <TabsList className="grid w-[200px] grid-cols-2">
+                <TabsTrigger value="address">Address</TabsTrigger>
+                <TabsTrigger value="coordinates">Coordinates</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
           
-          <TabsContent value="address" className="space-y-4">
-            <div>
-              <Label htmlFor="address">Enter Location Address</Label>
-              <Input
-                id="address"
-                placeholder="e.g. 123 Main St, City, Country"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="mt-1"
+          <div className="space-y-4">
+            {locationType === 'address' ? (
+              <div>
+                <Input
+                  id="address"
+                  placeholder="Enter address or location name"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="w-full"
+                />
+                <div className="mt-2 text-xs text-[#95A7B5]">
+                  Example: "Paris, France" or "1234 Main St, Toronto, ON"
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="latitude" className="text-sm text-[#253946] block mb-1">
+                    Latitude
+                  </Label>
+                  <Input
+                    id="latitude"
+                    placeholder="Latitude (e.g. 43.65107)"
+                    value={latitude}
+                    onChange={(e) => setLatitude(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="longitude" className="text-sm text-[#253946] block mb-1">
+                    Longitude
+                  </Label>
+                  <Input
+                    id="longitude"
+                    placeholder="Longitude (e.g. -79.347015)"
+                    value={longitude}
+                    onChange={(e) => setLongitude(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+            
+            {/* Replace placeholder with actual InteractiveMap */}
+            <div className="mt-4">
+              <InteractiveMap
+                frameType={frameType}
+                frameSize={frameSize}
+                initialAddress={address}
+                initialCoordinates={latitude && longitude ? { lat: parseFloat(latitude), lng: parseFloat(longitude) } : undefined}
+                onLocationSelect={handleLocationSelect}
+                showRotate={allowRotation}
+                orientation={mapOrientation}
+                onOrientationChange={handleOrientationChange}
               />
             </div>
-          </TabsContent>
-          
-          <TabsContent value="coordinates" className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="latitude">Latitude</Label>
-                <Input
-                  id="latitude"
-                  placeholder="e.g. 40.7128"
-                  value={latitude}
-                  onChange={(e) => setLatitude(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label htmlFor="longitude">Longitude</Label>
-                <Input
-                  id="longitude"
-                  placeholder="e.g. -74.0060"
-                  value={longitude}
-                  onChange={(e) => setLongitude(e.target.value)}
-                  className="mt-1"
-                />
+            
+            {/* Map Zoom Level */}
+            <div>
+              <Label htmlFor="map-zoom" className="text-sm text-[#253946] block mb-1">
+                Map Zoom Level: {mapZoom}
+              </Label>
+              <input
+                id="map-zoom"
+                type="range"
+                min="1"
+                max="20"
+                value={mapZoom}
+                onChange={(e) => setMapZoom(parseInt(e.target.value))}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-[#95A7B5]">
+                <span>Closer</span>
+                <span>Further</span>
               </div>
             </div>
-          </TabsContent>
-        </Tabs>
-      </div>
-      
-      {/* Engraving Text */}
-      <div>
-        <div className="flex items-center space-x-2 mb-3">
-          <PenLine className="w-4 h-4 text-[#A76825]" />
-          <h3 className="text-sm font-medium text-[#253946]">Personalization (Optional)</h3>
+            
+            {/* Map Orientation - Only for non-square frames */}
+            {!isSquare && allowRotation && (
+              <div>
+                <Label className="text-sm text-[#253946] block mb-1">
+                  Map Orientation
+                </Label>
+                <div className="grid grid-cols-2 gap-4">
+                  <Button
+                    type="button"
+                    variant={mapOrientation === 'horizontal' ? "default" : "outline"}
+                    onClick={() => handleOrientationChange('horizontal')}
+                    className={`h-auto py-2 ${
+                      mapOrientation === 'horizontal' ? 'bg-[#A76825] text-white hover:bg-[#8c571e]' : 'border-[#95A7B5]'
+                    }`}
+                  >
+                    Horizontal
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={mapOrientation === 'vertical' ? "default" : "outline"}
+                    onClick={() => handleOrientationChange('vertical')}
+                    className={`h-auto py-2 ${
+                      mapOrientation === 'vertical' ? 'bg-[#A76825] text-white hover:bg-[#8c571e]' : 'border-[#95A7B5]'
+                    }`}
+                  >
+                    Vertical
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-        
+      )}
+      
+      {/* Custom Engraving */}
+      <div>
+        <Label htmlFor="engraving" className="text-[#253946] font-medium block mb-2">
+          Custom Engraving (Optional)
+        </Label>
         <Textarea
-          placeholder="Add custom engraving text (max 50 characters)"
+          id="engraving"
+          placeholder="Add a custom message (max 100 characters)"
           value={engravingText}
-          onChange={(e) => setEngravingText(e.target.value.slice(0, 50))}
-          maxLength={50}
+          onChange={(e) => setEngravingText(e.target.value.substring(0, 100))}
+          maxLength={100}
           className="resize-none"
         />
-        <div className="flex justify-end mt-1">
-          <span className="text-xs text-[#95A7B5]">
-            {engravingText.length}/50 characters
+        <div className="flex justify-between mt-1 text-xs text-[#95A7B5]">
+          <span>
+            <PenLine className="w-3 h-3 inline-block mr-1" />
+            Optional custom text engraved on the frame
           </span>
+          <span>{engravingText.length}/100 characters</span>
         </div>
       </div>
       
-      <Separator className="my-4 bg-[#D2BDA2]/30" />
-      
-      {/* Quantity and Add to Cart */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        <div className="flex items-center border border-[#95A7B5] rounded-md">
-          <Button
-            type="button"
-            variant="ghost"
-            className="h-9 px-2"
+      {/* Quantity */}
+      <div>
+        <Label htmlFor="quantity" className="text-[#253946] font-medium block mb-2">
+          Quantity
+        </Label>
+        <div className="flex items-center">
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="icon"
             onClick={() => updateQuantity(quantity - 1)}
             disabled={quantity <= 1}
+            className="rounded-r-none"
           >
-            -
+            <span className="text-lg">-</span>
           </Button>
           <Input
+            id="quantity"
             type="number"
             min="1"
             max="10"
             value={quantity}
             onChange={(e) => updateQuantity(parseInt(e.target.value))}
-            className="h-9 w-12 text-center border-0"
+            className="w-16 text-center rounded-none"
           />
-          <Button
-            type="button"
-            variant="ghost"
-            className="h-9 px-2"
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="icon"
             onClick={() => updateQuantity(quantity + 1)}
             disabled={quantity >= 10}
+            className="rounded-l-none"
           >
-            +
+            <span className="text-lg">+</span>
           </Button>
         </div>
-        
-        <div className="flex flex-1 gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1 border-[#95A7B5] text-[#253946] hover:bg-[#95A7B5]/10"
-            onClick={handleAddToCart}
-          >
-            Add to Cart
-          </Button>
-          <Button
-            type="button"
-            className="flex-1 bg-[#A76825] hover:bg-[#8a561e] text-white"
-            onClick={handleBuyNow}
-          >
-            Buy Now
-          </Button>
-        </div>
+      </div>
+      
+      {/* Add to Cart and Buy Now Buttons */}
+      <div className="grid grid-cols-2 gap-4 pt-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleAddToCart}
+          disabled={!pricingLoaded}
+          className="border-[#A76825] text-[#A76825] hover:bg-[#A76825] hover:text-white transition-colors"
+        >
+          Add to Cart
+        </Button>
+        <Button
+          type="button"
+          onClick={handleBuyNow}
+          disabled={!pricingLoaded}
+          className="bg-[#A76825] text-white hover:bg-[#8c571e]"
+        >
+          Buy Now
+        </Button>
       </div>
     </div>
   );

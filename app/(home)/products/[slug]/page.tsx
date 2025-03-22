@@ -42,8 +42,8 @@ async function getProduct(slug: string) {
     const product = await prisma.product.findUnique({
       where: { slug },
       include: {
-        category: true,
-        reviews: true,
+        Category: true,
+        Review: true,
       },
     });
     
@@ -53,16 +53,26 @@ async function getProduct(slug: string) {
     const serializedProduct = {
       ...product,
       price: product.price.toString(),
-      createdAt: product.createdAt.toISOString(),
-      updatedAt: product.updatedAt.toISOString(),
-      category: product.category ? {
-        ...product.category,
-        createdAt: product.category.createdAt.toISOString(),
-        updatedAt: product.category.updatedAt.toISOString(),
+      createdAt: typeof product.createdAt === 'object' && product.createdAt !== null && 'toISOString' in product.createdAt 
+        ? product.createdAt.toISOString() 
+        : product.createdAt,
+      updatedAt: typeof product.updatedAt === 'object' && product.updatedAt !== null && 'toISOString' in product.updatedAt
+        ? product.updatedAt.toISOString()
+        : product.updatedAt,
+      category: product.Category ? {
+        ...product.Category,
+        createdAt: typeof product.Category.createdAt === 'object' && product.Category.createdAt !== null && 'toISOString' in product.Category.createdAt
+          ? product.Category.createdAt.toISOString()
+          : product.Category.createdAt,
+        updatedAt: typeof product.Category.updatedAt === 'object' && product.Category.updatedAt !== null && 'toISOString' in product.Category.updatedAt
+          ? product.Category.updatedAt.toISOString()
+          : product.Category.updatedAt,
       } : null,
-      reviews: product.reviews.map(review => ({
+      reviews: product.Review.map((review: any) => ({
         ...review,
-        createdAt: review.createdAt.toISOString(),
+        createdAt: typeof review.createdAt === 'object' && review.createdAt !== null && 'toISOString' in review.createdAt
+          ? review.createdAt.toISOString()
+          : review.createdAt,
       }))
     };
     
@@ -87,20 +97,28 @@ async function getRelatedProducts(categoryId: string | null, currentProductId: s
       },
       take: 4,
       include: {
-        category: true,
+        Category: true,
       },
     });
     
     // Convert Decimal values to strings to avoid serialization issues
-    const serializedProducts = relatedProducts.map(product => ({
+    const serializedProducts = relatedProducts.map((product: any) => ({
       ...product,
       price: product.price.toString(),
-      createdAt: product.createdAt.toISOString(),
-      updatedAt: product.updatedAt.toISOString(),
-      category: product.category ? {
-        ...product.category,
-        createdAt: product.category.createdAt.toISOString(),
-        updatedAt: product.category.updatedAt.toISOString(),
+      createdAt: typeof product.createdAt === 'object' && product.createdAt !== null && 'toISOString' in product.createdAt
+        ? product.createdAt.toISOString()
+        : product.createdAt,
+      updatedAt: typeof product.updatedAt === 'object' && product.updatedAt !== null && 'toISOString' in product.updatedAt
+        ? product.updatedAt.toISOString()
+        : product.updatedAt,
+      category: product.Category ? {
+        ...product.Category,
+        createdAt: typeof product.Category.createdAt === 'object' && product.Category.createdAt !== null && 'toISOString' in product.Category.createdAt
+          ? product.Category.createdAt.toISOString()
+          : product.Category.createdAt,
+        updatedAt: typeof product.Category.updatedAt === 'object' && product.Category.updatedAt !== null && 'toISOString' in product.Category.updatedAt
+          ? product.Category.updatedAt.toISOString()
+          : product.Category.updatedAt,
       } : null,
     }));
     
@@ -122,8 +140,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const relatedProducts = await getRelatedProducts(product.categoryId, product.id);
   
   // Calculate average rating
-  const avgRating = product.reviews.length > 0
-    ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / product.reviews.length
+  const avgRating = product.Review.length > 0
+    ? product.Review.reduce((sum: number, review: any) => sum + review.rating, 0) / product.Review.length
     : 0;
   
   return (
@@ -145,10 +163,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <div className="flex flex-col space-y-6">
           <div>
             <div className="flex items-center space-x-4 mb-2">
-              <span className="text-[#95A7B5]">{product.category?.name}</span>
+              <span className="text-[#95A7B5]">{product.Category?.name}</span>
               <span className="w-1 h-1 rounded-full bg-[#95A7B5]"></span>
               <span className="text-[#95A7B5]">
-                {product.reviews.length} {product.reviews.length === 1 ? 'review' : 'reviews'}
+                {product.Review.length} {product.Review.length === 1 ? 'review' : 'reviews'}
               </span>
             </div>
             <h1 className="text-3xl font-bold text-[#253946] mb-2">
@@ -169,7 +187,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       {/* Reviews Section */}
       <ProductReviews 
         productId={product.id} 
-        reviews={product.reviews} 
+        reviews={product.Review} 
         averageRating={avgRating} 
       />
       
@@ -178,7 +196,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       {/* Related Products */}
       <RelatedProducts 
         products={relatedProducts} 
-        categoryName={product.category?.name || 'Similar Products'} 
+        categoryName={product.Category?.name || 'Similar Products'} 
       />
     </div>
   );

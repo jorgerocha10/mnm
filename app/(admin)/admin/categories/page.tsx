@@ -16,7 +16,7 @@ type CategoryWithCount = {
   slug: string;
   image: string | null;
   _count: {
-    products: number;
+    Product: number;
   };
 };
 
@@ -29,7 +29,7 @@ async function getCategories(): Promise<CategoryWithCount[]> {
       include: {
         _count: {
           select: {
-            products: true,
+            Product: true,
           },
         },
       },
@@ -98,7 +98,7 @@ export default async function CategoriesPage() {
                 <div className="flex justify-between items-center mb-2">
                   <h3 className="text-lg font-medium text-[#253946]">{category.name}</h3>
                   <span className="text-sm text-[#95A7B5]">
-                    {category._count.products} {category._count.products === 1 ? 'product' : 'products'}
+                    {category._count.Product} {category._count.Product === 1 ? 'product' : 'products'}
                   </span>
                 </div>
                 <p className="text-sm text-[#95A7B5] mb-4 truncate">
@@ -119,7 +119,7 @@ export default async function CategoriesPage() {
                   <DeleteCategoryButton 
                     id={category.id}
                     name={category.name}
-                    disabled={category._count.products > 0}
+                    disabled={category._count.Product > 0}
                     disabledMessage="Cannot delete category with products"
                   />
                 </div>
