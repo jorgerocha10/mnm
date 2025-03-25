@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import Stripe from 'stripe';
 import { OrderStatus, PaymentStatus, FrameSize, FrameType } from '@prisma/client';
+import crypto from 'crypto';
 
 // Flag to indicate if we're in testing/development mode
 const USE_TEST_DATA = process.env.NODE_ENV === 'development';
@@ -78,7 +79,10 @@ export async function POST(req: NextRequest) {
       (sum, item) => sum + item.price * item.quantity,
       0
     );
-    const shipping = 12.99; // Fixed shipping cost
+    
+    // Free worldwide shipping
+    const shipping = 0;
+    
     const total = subtotal + shipping;
     
     console.log('Creating order in database');
@@ -130,6 +134,7 @@ export async function POST(req: NextRequest) {
       // Create order in database with proper type casting
       const order = await prisma.order.create({
         data: {
+          id: crypto.randomUUID(),
           customerName: validatedData.shippingInfo.fullName,
           customerEmail: validatedData.shippingInfo.email,
           shippingAddress: validatedData.shippingInfo.address,
@@ -144,6 +149,8 @@ export async function POST(req: NextRequest) {
           status: OrderStatus.PROCESSING,
           paymentIntentId: validatedData.paymentIntentId,
           paymentStatus: PaymentStatus.PAID,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
       });
       
@@ -190,43 +197,26 @@ export async function POST(req: NextRequest) {
         }
       }
       
-      // Create order items
+      // Add OrderItem records for each item in the order
       for (const item of validatedData.items) {
-        // Log the productId for debugging
-        console.log('Creating order item for product:', item.productId);
-        
-        try {
-          await prisma.orderItem.create({
-            data: {
-              order: {
-                connect: { id: order.id },
-              },
-              product: {
-                connect: { id: item.productId },
-              },
-              quantity: item.quantity,
-              price: item.price,
-              frameSize: mapFrameSize(item.frameSize),
-              frameType: mapFrameType(item.frameType),
-              engravingText: item.engravingText || null,
+        await prisma.orderItem.create({
+          data: {
+            id: crypto.randomUUID(),
+            Order: {
+              connect: { id: order.id },
             },
-          });
-        } catch (itemError) {
-          console.error('Error creating order item:', itemError);
-          console.error('Item data:', {
-            productId: item.productId,
-            name: item.name,
-            price: item.price
-          });
-          
-          if (USE_TEST_DATA) {
-            console.log('Attempting to handle the error in test mode');
-            // In test mode, continue processing the rest of the order items
-            continue;
-          } else {
-            throw itemError;
+            Product: {
+              connect: { id: item.productId },
+            },
+            quantity: item.quantity,
+            price: item.price,
+            frameSize: item.frameSize as FrameSize || null,
+            frameType: item.frameType as FrameType || null,
+            engravingText: item.engravingText || null,
+            mapZoom: item.location ? 13 : null,
+            mapOrientation: "horizontal"
           }
-        }
+        });
       }
       
       console.log('All order items created successfully');

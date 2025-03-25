@@ -431,26 +431,6 @@ export default function ProductOptions({ product }: ProductOptionsProps) {
               />
             </div>
             
-            {/* Map Zoom Level */}
-            <div>
-              <Label htmlFor="map-zoom" className="text-sm text-[#253946] block mb-1">
-                Map Zoom Level: {mapZoom}
-              </Label>
-              <input
-                id="map-zoom"
-                type="range"
-                min="1"
-                max="20"
-                value={mapZoom}
-                onChange={(e) => setMapZoom(parseInt(e.target.value))}
-                className="w-full"
-              />
-              <div className="flex justify-between text-xs text-[#95A7B5]">
-                <span>Closer</span>
-                <span>Further</span>
-              </div>
-            </div>
-            
             {/* Map Orientation - Only for non-square frames */}
             {!isSquare && allowRotation && (
               <div>

@@ -34,8 +34,8 @@ export default function CheckoutPage() {
   // Calculate the total amount
   const subtotal = getTotal();
   
-  // Fixed shipping cost
-  const shipping = 12.99;
+  // Free worldwide shipping
+  const shipping = 0;
   const total = subtotal + shipping;
 
   // Convert cart items from store format to the format expected by OrderReview component

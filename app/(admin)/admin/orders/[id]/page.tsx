@@ -79,16 +79,16 @@ export default async function OrderPage({ params }: OrderPageProps) {
     firstItemMapOrientation: order.OrderItem?.[0]?.mapOrientation,
   });
 
-  // Calculate totals
+  // Order subtotal
   const orderSubtotal = order.OrderItem.reduce(
     (sum: number, item: any) => sum + Number(item.price) * item.quantity,
     0
   );
   
-  // Shipping cost (if applicable)
-  const shippingCost = 0; // You'd calculate this based on your business logic
+  // Free worldwide shipping
+  const shippingCost = 0;
   
-  // Total
+  // Order total from database
   const orderTotal = Number(order.total);
 
   return (

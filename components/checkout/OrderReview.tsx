@@ -33,8 +33,8 @@ export default function OrderReview({
     return sum + (item.price * item.quantity);
   }, 0);
   
-  // Set fixed shipping cost
-  const shipping = 12.99;
+  // Set shipping to zero (free worldwide shipping)
+  const shipping = 0;
   
   // Calculate total
   const total = subtotal + shipping;

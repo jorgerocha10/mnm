@@ -208,7 +208,7 @@ export default function CartPage() {
               
               <div className="flex justify-between">
                 <span className="text-[#253946]">Shipping</span>
-                <span className="text-[#253946]">Calculated at checkout</span>
+                <span className="text-[#253946]">Free worldwide shipping</span>
               </div>
               
               <Separator className="my-4" />
@@ -226,7 +226,7 @@ export default function CartPage() {
               </Button>
               
               <div className="text-center text-sm text-[#95A7B5] mt-4">
-                Shipping and taxes calculated at checkout
+                Free shipping to anywhere in the world
               </div>
             </div>
           </div>
