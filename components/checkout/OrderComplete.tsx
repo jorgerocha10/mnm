@@ -20,9 +20,15 @@ export default function OrderComplete({ orderId, customerEmail }: OrderCompleteP
       <h1 className="text-2xl font-semibold text-[#253946]">Thank You For Your Order!</h1>
       
       <p className="text-[#95A7B5] max-w-md">
-        Your order <span className="font-medium text-[#253946]">#{orderId}</span> has been placed successfully. 
-        A confirmation has been sent to <span className="font-medium text-[#253946]">{customerEmail}</span>.
+        Your order <span className="font-medium text-[#253946]">#{orderId}</span> has been placed successfully.
       </p>
+      
+      <div className="flex items-center justify-center bg-[#D2BDA2]/20 p-3 rounded-md w-full max-w-md">
+        <Check className="h-5 w-5 text-[#A76825] mr-2" />
+        <p className="text-[#253946]">
+          Order confirmation email sent to <span className="font-medium">{customerEmail}</span>
+        </p>
+      </div>
       
       <div className="bg-[#F7F5F6] p-6 rounded-lg w-full max-w-md">
         <h2 className="font-medium text-[#253946] mb-4">What's Next?</h2>

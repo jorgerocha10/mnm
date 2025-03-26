@@ -25,6 +25,13 @@ export async function sendEmail({
   try {
     const { from, replyTo } = emailConfig;
     
+    console.log('Attempting to send email:', {
+      to,
+      subject,
+      from,
+      replyTo,
+    });
+    
     const result = await resend.emails.send({
       from,
       to,
@@ -35,9 +42,16 @@ export async function sendEmail({
       replyTo,
     });
 
+    console.log('Email sent successfully:', result);
     return { success: true, data: result };
-  } catch (error) {
-    console.error('Error sending email:', error);
+  } catch (error: any) {
+    console.error('Error sending email:', {
+      error,
+      errorMessage: error?.message,
+      errorResponse: error?.response,
+      to,
+      subject,
+    });
     return { success: false, error };
   }
 }

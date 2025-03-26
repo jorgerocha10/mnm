@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import Stripe from 'stripe';
 import { OrderStatus, PaymentStatus, FrameSize, FrameType } from '@prisma/client';
 import crypto from 'crypto';
+import { sendOrderConfirmationEmail } from '@/lib/email/send-email';
 
 // Flag to indicate if we're in testing/development mode
 const USE_TEST_DATA = process.env.NODE_ENV === 'development';
@@ -220,6 +221,49 @@ export async function POST(req: NextRequest) {
       }
       
       console.log('All order items created successfully');
+      
+      // Send order confirmation email
+      try {
+        // Prepare order data for email
+        const orderForEmail = {
+          id: order.id,
+          customerName: order.customerName,
+          customerEmail: order.customerEmail,
+          orderDate: order.createdAt,
+          total: order.total,
+          items: await Promise.all(validatedData.items.map(async (item) => {
+            // Get product image if available
+            const product = await prisma.product.findUnique({
+              where: { id: item.productId },
+              select: { images: true }
+            });
+            
+            return {
+              productId: item.productId,
+              name: item.name,
+              price: item.price,
+              image: product?.images?.[0] || "https://placehold.co/200x200/png",
+              quantity: item.quantity,
+              frameSize: item.frameSize,
+              frameType: item.frameType,
+              engravingText: item.engravingText,
+            };
+          })),
+          shippingAddress: {
+            address: order.shippingAddress,
+            city: order.city,
+            postalCode: order.postalCode,
+            country: order.country,
+          }
+        };
+        
+        // Send the email
+        const emailResult = await sendOrderConfirmationEmail(orderForEmail);
+        console.log('Order confirmation email sent:', emailResult.success);
+      } catch (emailError) {
+        // Just log the error but don't fail the order creation
+        console.error('Failed to send order confirmation email:', emailError);
+      }
       
       // Return the created order
       return NextResponse.json({
